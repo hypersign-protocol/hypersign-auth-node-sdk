@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="jqrueryQrcode.min.js"></script>
+    <title>WebSockets - Simple chat</title>
+</head>
+
+<body>
+    <div align="center">
+        <h1>Login With QR Code</h1>
+        <div id="qrcode">
+            <img src='loader.gif' />
+        </div>
+        <div id="profile"></div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        initiate();
+
+    });
+
+    function formattedMessage(m) {
+        return JSON.stringify({
+            type: 'client',
+            message: m
+        })
+    }
+
+    function initiate() {
+        let clientId = Math.floor(Math.random(10) * 100);
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
+        if (!window.WebSocket) {
+            alert('Sorry, but your browser doesn\'t support WebSocket.')
+            return;
+        }
+
+        let ws = new WebSocket(`ws://${window.location.host}`);
+        ws.onopen = function() {};
+
+        ws.onmessage = function({
+            data
+        }) {
+            let messageData = JSON.parse(data);
+            console.log(messageData)
+            $("#qrcode").html("");
+            $('#profile').html('');
+            if (messageData.op == 'init') {
+                $("#qrcode").qrcode({
+                    "width": 100,
+                    "height": 100,
+                    "text": messageData.data
+                });
+            } else if (messageData.op == 'end') {
+                ws.close();
+                $("#qrcode").hide();
+                const userdata = JSON.stringify(messageData.data.userdata, 2)
+                $('#profile').html(userdata)
+            }
+        };
+
+        ws.onerror = function(error) {};
+
+    }
+</script>
+
+</html>

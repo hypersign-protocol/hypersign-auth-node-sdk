@@ -86,7 +86,6 @@ At first add a div.
 Then implement Websocket communication code.
 
 ```js
-
 <script>
 let ws = new WebSocket(`ws://${window.location.host}`);
 ws.onmessage = function({data }) {
