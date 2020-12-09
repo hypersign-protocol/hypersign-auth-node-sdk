@@ -1,0 +1,24 @@
+{
+    "name": "hypersign-auth-js-sdk",
+    "version": "1.0.0",
+    "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
+    "main": "HypersignAuth.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "hypersign",
+        "passwordless",
+        "blockchain",
+        "ssi",
+        "privacy"
+    ],
+    "author": "Vishwas Anand Bhushan",
+    "license": "MIT",
+    "dependencies": {
+        "jsonwebtoken": "^8.5.1",
+        "lds-sdk": "^4.0.2",
+        "uuid": "^8.3.2",
+        "websocket": "^1.0.33"
+    }
+}
