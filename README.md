@@ -1,4 +1,4 @@
-# Hypersign Passwordless Auth JavaScript SDK
+# Hypersign Authentication using JavaScript SDK
 
 Hypersign is identity and access management infrastructure that ensures your employess and customers are really who they say they are. By combining biometric with the blockchian, it offers passwordless authentication, authorization, verification and intergrates in minutes.
 
@@ -75,12 +75,17 @@ app.get('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
 
 ### Client Side
 
-
+At first add a div.
 
 ```html
 <body>
     <div id="qrcode"></div>
 </body>
+```
+
+Then implement Websocket communication code.
+
+```js
 
 <script>
 let ws = new WebSocket(`ws://${window.location.host}`);
