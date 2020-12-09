@@ -4,7 +4,7 @@ Hypersign is identity and access management infrastructure that ensures your emp
 
 Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentication with any Nodejs web app. This SDK uses Websocket to communicate with client.
 
-![ss](public/demo/app-demo.png)
+![ss](demo/public/app-demo.png)
 
 ## Installation
 
