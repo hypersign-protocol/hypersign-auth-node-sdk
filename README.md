@@ -75,6 +75,8 @@ app.get('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
 })
 ```
 
+Make sure to pass hsAuthorization token in  `x-auth-token` header when making the protected resource call.
+
 ### Client Side
 
 At first add a div.
