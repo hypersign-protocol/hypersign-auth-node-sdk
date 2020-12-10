@@ -16,7 +16,7 @@ module.exports = class HypersignAuth {
             next();
         } catch (e) {
             console.log(e)
-            res.status(403).send(e.message);
+            res.status(401).send(e.message);
         }
     }
 
