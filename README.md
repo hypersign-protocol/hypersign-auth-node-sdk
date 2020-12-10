@@ -4,6 +4,8 @@ Hypersign is identity and access management infrastructure that ensures your emp
 
 Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentication with any Nodejs web app. This SDK uses Websocket to communicate with client.
 
+<a href="https://www.producthunt.com/posts/hypersign-1?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-hypersign-1" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=276083&theme=light" alt="Hypersign - An identity and access sol'n that protects user's privacy | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
 ![ss](demo/public/app-demo.png)
 
 ## Installation
@@ -107,4 +109,4 @@ ws.onmessage = function({data }) {
 ```
 Get the complete implemetation demo [here](demo/README.md). You can also get detials about the Hypersign protocol from Product hunt or from our [website](https://hypermine.in/hypersign)
 
-<a href="https://www.producthunt.com/posts/hypersign-1?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-hypersign-1" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=276083&theme=light" alt="Hypersign - An identity and access sol'n that protects user's privacy | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
