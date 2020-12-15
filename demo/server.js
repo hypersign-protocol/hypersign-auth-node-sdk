@@ -20,13 +20,13 @@ app.use(express.static('public'))
 const options = {
     jwtSecret: process.env.JWTSECRET || 'vErySecureSec8@#',
     jwtExpiryTime: process.env.JWTEXPTIME || 240000, // in ms
-    hsNodeUrl: 'http://localhost:5000',
+    hsNodeUrl: process.env.NODEURL || 'http://localhost:5000',
     hsAppId: 'XXX-XXXX-XXX',
     hsAppSecret: 'XXX-XXXX-XXX'
 }
 const hypersign = new HypersignAuth({
     server, // http server,
-    baseUrl: 'http://localhost:4006',
+    baseUrl: process.env.BASEURL || 'http://localhost:4006',
     options
 });
 
@@ -39,8 +39,9 @@ app.get('/', function(req, res) {
 app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
     try {
         const user = req.body.hsUserData;
-        // Do something with the user data.
-        // The hsUserData contains userdata and authorizationToken
+        console.log(user)
+            // Do something with the user data.
+            // The hsUserData contains userdata and authorizationToken
         res.status(200).send({ status: 200, message: "Success", error: null });
     } catch (e) {
         res.status(500).send({ status: 500, message: null, error: e.message });
@@ -49,11 +50,12 @@ app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) =
 
 // Protected resource
 // Must pass hs_authorizationToken in x-auth-token header
-app.get('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
+app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
     try {
         const user = req.body.userData;
-        // Do whatever you want to do with it
-        res.status(200).send("I am protected by secure Hypersign authentication");
+        console.log(user)
+            // Do whatever you want to do with it
+        res.status(200).send({ status: 200, message: user, error: null });
     } catch (e) {
         res.status(500).send(e.message)
     }

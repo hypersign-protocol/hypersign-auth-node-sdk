@@ -58,8 +58,28 @@
             } else if (messageData.op == 'end') {
                 ws.close();
                 $("#qrcode").hide();
-                const userdata = JSON.stringify(messageData.data.userdata, 2)
-                $('#profile').html(userdata)
+                const AuthToken = messageData.data.userdata
+                const url = `http://${window.location.host}/protected`
+                console.log(url)
+                fetch(url, {
+                        headers: {
+                            "x-auth-token": AuthToken
+                        },
+                        method: "POST"
+                    }).then(res => res.json())
+                    .then(json => {
+                        if (json.status == 403) {
+                            console.log('eroor 403')
+                        } else {
+
+                            console.log(json.message);
+                            $('#profile').html(JSON.stringify(json.message))
+
+                        }
+                    })
+                    .catch((e) => {
+                        console.log(e)
+                    })
             }
         };
 
