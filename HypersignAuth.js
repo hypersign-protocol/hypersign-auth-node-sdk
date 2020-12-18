@@ -20,9 +20,19 @@ module.exports = class HypersignAuth {
         }
     }
 
+    extractToken (req) {
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+            return req.headers.authorization.split(' ')[1];
+        } else if (req.query && req.query.token) {
+            return req.query.token;
+        }
+        return null;
+    }
+
     async authorize(req, res, next) {
         try {
-            const authToken = req.headers['x-auth-token'];
+            const authToken = this.extractToken(req);
+            if (!authToken) throw new Error('Authorization token is not passed in the header')
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
         } catch (e) {

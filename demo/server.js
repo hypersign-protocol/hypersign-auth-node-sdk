@@ -20,13 +20,13 @@ app.use(express.static('public'))
 const options = {
     jwtSecret: process.env.JWTSECRET || 'vErySecureSec8@#',
     jwtExpiryTime: process.env.JWTEXPTIME || 240000, // in ms
-    hsNodeUrl: process.env.NODEURL || 'http://localhost:5000',
+    hsNodeUrl: process.env.NODEURL || 'https://ssi.hypermine.in/core',
     hsAppId: 'XXX-XXXX-XXX',
     hsAppSecret: 'XXX-XXXX-XXX'
 }
 const hypersign = new HypersignAuth({
     server, // http server,
-    baseUrl: process.env.BASEURL || 'http://localhost:4006',
+    baseUrl: process.env.BASEURL || 'http://localhost:4006', // make sure you change this
     options
 });
 

@@ -31,13 +31,9 @@ module.exports = class HSMiddlewareService {
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
         if (!(await this.verifyVP(vpObj, challenge))) throw new Error('Could not verify the presentation')
-        console.log('Presentation is verified successfully')
-        const token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
-        console.log('Token is created, token = ', token)
+        const token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });        
         const client = clientStore.getClient(challenge)
-        console.log('Client fetched, clientID = ', client.clientId)
-        console.log('Notifiying the browser')
-        client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', userdata: token }))
+        client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
         clientStore.deleteClient(client.clientId);
         return {
             hs_userdata: subject,
@@ -46,7 +42,6 @@ module.exports = class HSMiddlewareService {
     }
 
     async authorize(authToken) {
-        if (!authToken) throw new Error('Please send the x-auth-token in the header')
         return await jwt.verify(authToken, this.options.jwtSecret)
     }
 
