@@ -2,11 +2,17 @@
 
 Hypersign is identity and access management infrastructure that ensures your employess and customers are really who they say they are. By combining biometric with the blockchian, it offers passwordless authentication, authorization, verification and intergrates in minutes.
 
-Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentication with any Nodejs web app. This SDK uses Websocket to communicate with client.
+Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentication with any Nodejs web app. This SDK uses Websocket to communicate with client. 
 
 <a href="https://www.producthunt.com/posts/hypersign-1?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-hypersign-1" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=276083&theme=light" alt="Hypersign - An identity and access sol'n that protects user's privacy | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ![ss](demo/public/app-demo.png)
+
+## The protocol
+
+![img](demo/public/protocol2.png)
+
+For more detials about Hypersign protocol, read the [developer documentation](https://www.docs.hypersign.id) or read our whitepaper at our [website](https://hypersign.id).
 
 ## Installation
 
@@ -102,7 +108,8 @@ ws.onmessage = function({data }) {
     } else if (messageData.op == 'end') {
         ws.close();
         $("#qrcode").hide();
-        alert(JSON.stringify(messageData.data.userdata, 2)) // This will be the authorization token you get once you are verified 
+        const authorizationToken = messageData.data.token;
+        // This will be the authorization token you get once you are verified 
     }
 };
 </script>
