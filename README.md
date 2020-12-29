@@ -8,6 +8,10 @@ Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentic
 
 ![ss](demo/public/app-demo.png)
 
+## Watch the demo on Youtube
+
+[![IMAGE ALT TEXT](http://i.imgur.com/FWVjPfu.png)](https://www.youtube.com/watch?v=pSCmCZfeQKo&feature=youtu.be "hypersign developer exp")  
+
 ## The protocol
 
 ![img](demo/public/protocol2.png)
