@@ -19,6 +19,7 @@
         "jsonwebtoken": "^8.5.1",
         "lds-sdk": "^4.0.2",
         "uuid": "^8.3.2",
-        "websocket": "^1.0.33"
+        "websocket": "^1.0.33",
+        "nodemailer": "^6.4.11"
     }
 }
