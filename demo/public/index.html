@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.qrcode@1.0.3/jquery.qrcode.min.js"></script>
-    <title>WebSockets - Simple chat</title>
+    <title>Hypersign Login Demo</title>
 </head>
 
 <body>
@@ -14,6 +14,7 @@
         <div id="qrcode">
             <img src='loader.gif' />
         </div>
+        <a href="/register">Register</a>
         <div id="profile"></div>
     </div>
 </body>
@@ -51,8 +52,8 @@
             $('#profile').html('');
             if (messageData.op == 'init') {
                 $("#qrcode").qrcode({
-                    "width": 100,
-                    "height": 100,
+                    "width": 300,
+                    "height": 300,
                     "text": messageData.data
                 });
             } else if (messageData.op == 'end') {

@@ -1,0 +1,20 @@
+{
+    "keys": {
+        "publicKey": {
+            "@context": "https://w3id.org/security/v2",
+            "id": "did:hs:3374ce69-ad4a-4a6e-ba7d-9cf703452236#z6MkfyzQszkdBb3TtVJixgzNabesULWVRwPbL7GMxyoZsoKq",
+            "type": "Ed25519VerificationKey2018",
+            "publicKeyBase58": "2XjNHkWBr3YzmzU2H82XjW6semEe249Ee6MS8hqYxaYT"
+        },
+        "privateKeyBase58": "jndZAnQ6LqL5TUbgorkg84iudvPr2j35mLKbNUGNrjoQtwncJnjBpEzyWbDBnWFA8gucCFNAku9TEp9Ntuyp2EX"
+    },
+    "schemaId": "sch_6327fe1c-6a85-46",
+    "network": "",
+    "mail": {
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "user": "test@gmail.com",
+        "pass": "test@pass123",
+        "name": "Demo Admin"
+    }
+}
