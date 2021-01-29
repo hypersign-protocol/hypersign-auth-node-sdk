@@ -3,14 +3,15 @@ const hsdk = require('lds-sdk');
 const regMailTemplate = require('./mail.template');
 const MailService = require('./mail.service');
 const { clientStore } = require('./config');
+const fetch = require('node-fetch');
 
 
 module.exports = class HSMiddlewareService {
     constructor(options = {}, baseUrl) {
         this.options = {};
-        this.options.jwtExpiryTime = options ? options.jwtExpiryTime : 240000;
-        this.options.jwtSecret = options ? options.jwtSecret : 'secretKey';
-        this.options.hsNodeUrl = options ? options.hsNodeUrl : 'http://localhost:5000'
+        this.options.jwtExpiryTime = options ? options.jwt.expiryTime : 240000;
+        this.options.jwtSecret = options ? options.jwt.secret : 'secretKey';
+        this.options.hsNodeUrl = options ? options.networkUrl : 'https://ssi.hypermine.in/core'
         this.options.mail = options ? options.mail : mail;
         this.hsSdkVC = hsdk.credential({ nodeUrl: this.options.hsNodeUrl, didScheme: "did:hs" });
         this.baseUrl = baseUrl;
@@ -22,7 +23,13 @@ module.exports = class HSMiddlewareService {
         this.options.schemaId = options.schemaId;
         this.options.mail = options.mail;
 
+        this.options.appCredential = options.appCredential;
+        this.developerDashboardVerifyApi = `${this.sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
+
         this.mailService = this.options.mail ? new MailService({...this.options.mail }) : null;
+
+        this.apiAuthToken = "";
+        this.isSubscriptionSuccess = false;
     }
 
     sanetizeUrl(url) {
@@ -48,16 +55,22 @@ module.exports = class HSMiddlewareService {
     async generateCredential(userData) {
         const schemaUrl = this.options.hsNodeUrl + '/api/schema/get/' + this.options.schemaId;
         const issuerKeys = this.options.keys;
+        const { did } = userData;
 
-        // TODO: need to do this in better way..more dynamic way.
-        // make use of SCHEMA.attributes
-        const attributesMap = {
-            "Name": userData.name,
-            "Email": userData.email
-        }
+        // removing unwanted fields since they got added by JWT
+        delete userData['iat'];
+        delete userData['exp'];
+        delete userData['did'];
+
+        // TODO:  remove this code later please.... you need to fix this in the core's
+        const attributesMap = [];
+        Object.keys(userData).forEach((attr, i) => {
+            if (i > 0) attributesMap[` ${attr}`] = userData[attr]
+            else attributesMap[attr] = userData[attr]
+        })
 
         const credential = await this.hsSdkVC.generateCredential(schemaUrl, {
-            subjectDid: userData.did,
+            subjectDid: did,
             issuerDid: issuerKeys.publicKey.id,
             expirationDate: new Date().toISOString(),
             attributesMap,
@@ -67,9 +80,71 @@ module.exports = class HSMiddlewareService {
         return signedCredential
     }
 
+    async generatePresentation() {
+        const issuerKeys = this.options.keys;
+        const presentation = await this.hsSdkVC.generatePresentation(
+            this.options.appCredential,
+            issuerKeys.publicKey.id
+        );
+        const challenge = hsdk.did().getChallange();
+        const signedPresentation = await this.hsSdkVC.signPresentation(presentation, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58, challenge)
+        return signedPresentation
+    }
+
+    async fetchData(url, options) {
+        const resp = await fetch(url, options)
+        const json = await resp.json();
+        return json;
+    }
+
+    async callSubscriptionAPIwithPresentation() {
+        const data = await this.generatePresentation();
+        const json = await this.fetchData(this.developerDashboardVerifyApi, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        })
+
+        if (json.status == 200) {
+            this.isSubscriptionSuccess = true;
+            this.apiAuthToken = json.message;
+        } else if (json.status == 401) {
+            throw new Error('Unauthorized subscription API access');
+        } else {
+            throw new Error(json.error);
+        }
+    }
+
+    async checkSubscription() {
+
+        if (this.apiAuthToken == "") {
+            console.log('No API Authorization token found, authenticating using verifiable presentation');
+            await this.callSubscriptionAPIwithPresentation();
+        } else {
+            console.log('Found API Authorization token, trying to authorize');
+            const developerPortalAPI = `${this.developerDashboardVerifyApi}?apiAuthToken=${this.apiAuthToken}`;
+            const json = await this.fetchData(developerPortalAPI, {
+                method: 'POST',
+            });
+
+            if (json.status == 200) {
+                this.isSubscriptionSuccess = true;
+            } else if (json.status == 403) {
+                console.log('API Authorization token has expired. Trying to authentication again using verifiable presentation');
+                await this.callSubscriptionAPIwithPresentation();
+            } else {
+                throw new Error(json.error);
+            }
+        }
+    }
+
     // Public methods
     /////////////////
     async authenticate({ challenge, vp }) {
+        await this.checkSubscription();
+        if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
@@ -95,15 +170,9 @@ module.exports = class HSMiddlewareService {
         mailTemplate = mailTemplate.replace(/@@APPNAME@@/g, 'Demo App');
         mailTemplate = mailTemplate.replace('@@RECEIVERNAME@@', user.name);
         mailTemplate = mailTemplate.replace('@@LINK@@', link);
-
         const deepLinkUrl = 'https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=superhero:credential?url=' + link;
-        console.log('After generate DEEPLINKURL =', deepLinkUrl);
-
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
-
-        console.log('Before sending the mail');
         const info = await this.mailService.sendEmail(user.email, mailTemplate);
-        console.log('Mail is sent info = ', info);
     }
 
     async getCredential(token, userDid) {

@@ -2,25 +2,54 @@ const HSWebsocket = require('./hsWebsocket');
 const HSMiddlewareService = require('./hsMiddlewareService');
 const fs = require('fs');
 const path = require('path');
-
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json'
 module.exports = class HypersignAuth {
 
-    constructor({ server, baseUrl, options }) {
+    constructor(server) {
         ////
         // Making it backward compatible
-        const hsFilePath = path.join(__dirname, '../../', '/', HYPERSIGN_CONFIG_FILE);
-        if (fs.existsSync(hsFilePath)) {
-            const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
-            const hsConfigJson = JSON.parse(hypersignConfig);
-            Object.assign(options, hsConfigJson);
-            // throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the dashboard.');
+        const hsFilePath = path.join(__dirname, '/', HYPERSIGN_CONFIG_FILE);
+        if (!fs.existsSync(hsFilePath)) throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; https://developer.hypersign.id');
+
+        const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
+        const hsConfigJson = JSON.parse(hypersignConfig);
+
+        if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
+        if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
+        if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
+        if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
+
+        const ws = new HSWebsocket(server, hsConfigJson.appCredential.credentialSubject.serviceEp);
+        ws.initiate();
+
+        const options = {
+            keys: {},
+            mail: {},
+            jwt: {},
+            appCredential: {}
+        };
+        Object.assign(options.mail, hsConfigJson.mail);
+        Object.assign(options.keys, hsConfigJson.keys);
+        Object.assign(options.appCredential, hsConfigJson.appCredential);
+
+        options.networkUrl = hsConfigJson.networkUrl;
+        options.schemaId = hsConfigJson.appCredential.credentialSubject.schemaId;
+        options.developerDashboardUrl = hsConfigJson.developerDashboardUrl ? hsConfigJson.developerDashboardUrl : 'https://ssi.hypermine.in/developer/';
+
+        if (!hsConfigJson.jwt) {
+            const jwtDefault = {
+                secret: 'BadsecretKey1@',
+                expiryTime: '900s' // epires in 15 mins
+            }
+            Object.assign(options.jwt, jwtDefault)
+            console.log('JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
+        } else {
+            Object.assign(options.jwt, hsConfigJson.jwt)
         }
 
-        console.log(options);
-        const ws = new HSWebsocket(server, baseUrl);
-        ws.initiate();
-        this.middlewareService = new HSMiddlewareService(options, baseUrl);
+
+        this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
+
     }
 
     async authenticate(req, res, next) {
@@ -49,19 +78,16 @@ module.exports = class HypersignAuth {
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
         } catch (e) {
-            console.log(e)
             res.status(403).send(e.message);
         }
     }
 
     async register(req, res, next) {
         try {
-            console.log(req.body);
             if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')
             await this.middlewareService.register(req.body);
             next();
         } catch (e) {
-            console.log(e)
             res.status(403).send(e.message);
         }
     }
@@ -75,7 +101,6 @@ module.exports = class HypersignAuth {
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
             next();
         } catch (e) {
-            console.log(e)
             res.status(403).send(e.message);
         }
     }
