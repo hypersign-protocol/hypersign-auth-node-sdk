@@ -8,7 +8,7 @@ module.exports = class HypersignAuth {
     constructor(server) {
         ////
         // Making it backward compatible
-        const hsFilePath = path.join(__dirname, '/', HYPERSIGN_CONFIG_FILE);
+        const hsFilePath = path.join(__dirname, '../', '../', HYPERSIGN_CONFIG_FILE);
         if (!fs.existsSync(hsFilePath)) throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; https://developer.hypersign.id');
 
         const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);

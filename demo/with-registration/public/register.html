@@ -13,6 +13,7 @@
         <form action="">
             <input type="text" name="name" placeholder="Enter your name"><br>
             <input type="text" name="email" placeholder="Enter your email"><br>
+            <input type="text" name="phoneNumber" placeholder="Enter your phoneNumber"><br>
         </form>
         <button onclick="register()">Register</button>
         <span style="display:none" class="loader">
@@ -32,7 +33,7 @@
         });
         console.log(data)
         $.post(
-            'http://192.168.43.43:4006/hs/api/v2/register',
+            `http://${window.location.host}/hs/api/v2/register`,
             data,
             (err, status) => {
                 $('span.loader').hide();
