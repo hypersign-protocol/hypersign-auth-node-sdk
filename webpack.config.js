@@ -8,7 +8,8 @@ function configure(filename, opts = {}) {
         mode: 'development', // automatically overriden by production flag
         devtool: argv.mode === 'production' ? 'source-map' : 'eval-source-map',
         node: {
-            fs: 'empty'
+            fs: 'empty',
+            __dirname: false
         },
         module: {
             rules: [{
