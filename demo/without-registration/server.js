@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
-const HypersignAuth = require('hypersign-auth-js-sdk')
+const HypersignAuth = require('hypersign-auth-js-sdk');
+// import HypersignAuth from 'hypersign-auth-js-sdk';
 
 const port = 4000
 const app = express()
@@ -15,7 +16,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(cookieParser());
-
 
 const hypersign = new HypersignAuth(server);
 

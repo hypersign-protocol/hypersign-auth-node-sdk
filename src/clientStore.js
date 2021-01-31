@@ -9,11 +9,12 @@ class Client {
 }
 
 module.exports = class ClientStore {
-    clients = {};
+
     constructor() {}
     addClient(connection) {
         if (!connection) throw new Error('Connection is null')
         const client = new Client(connection);
+        this.clients = {} //in-mem store
         this.clients[client.clientId] = client;
         return client.clientId;
     }
