@@ -34,12 +34,14 @@ module.exports = class HSWebsocket {
             const connection = request.accept(null, request.origin)
             console.log(`${TIME()} Client connected`)
             const clientId = clientStore.addClient(connection);
-            connection.sendUTF(this.getFormatedMessage('init', {
+            const JSONData = {
+                QRType: 'REQUEST_CRED',
                 serviceEndpoint: this.baseUrl + 'hs/api/v2/auth?challenge=' + clientId,
                 schemaId: this.schemaId,
                 appDid: this.appDid,
                 appName: this.appName
-            }));
+            }
+            connection.sendUTF(this.getFormatedMessage('init', JSONData));
             connection.on('message', (m) => {})
             connection.on('close', (conn) => {
                 console.log(`${TIME()} disconnected`)
