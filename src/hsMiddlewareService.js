@@ -21,12 +21,15 @@ module.exports = class HSMiddlewareService {
 
         this.options.keys = options.keys;
         this.options.schemaId = options.schemaId;
+
         this.options.mail = options.mail;
+
 
         this.options.appCredential = options.appCredential;
         this.developerDashboardVerifyApi = `${this.sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
 
         this.mailService = this.options.mail ? new MailService({...this.options.mail }) : null;
+
 
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
@@ -167,12 +170,16 @@ module.exports = class HSMiddlewareService {
         const token = await jwt.sign(user, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime })
         let link = `${this.baseUrl}/hs/api/v2/credential?token=${token}`;
         let mailTemplate = regMailTemplate;
-        mailTemplate = mailTemplate.replace(/@@APPNAME@@/g, 'Demo App');
+        mailTemplate = mailTemplate.replace(/@@APPNAME@@/g, this.options.mail.name);
         mailTemplate = mailTemplate.replace('@@RECEIVERNAME@@', user.name);
         mailTemplate = mailTemplate.replace('@@LINK@@', link);
-        const deepLinkUrl = 'https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=superhero:credential?url=' + link;
+        const JSONdata = JSON.stringify({
+            QRType: 'ISSUE_CRED',
+            url: link
+        });
+        const deepLinkUrl = encodeURI('https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:account?url=' + JSONdata);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
-        const info = await this.mailService.sendEmail(user.email, mailTemplate);
+        const info = await this.mailService.sendEmail(user.email, mailTemplate, `${this.options.mail.name} Auth Credential Issuance`);
     }
 
     async getCredential(token, userDid) {

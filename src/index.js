@@ -19,8 +19,6 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
 
-        const ws = new HSWebsocket(server, hsConfigJson.appCredential.credentialSubject.serviceEp);
-        ws.initiate();
 
         const options = {
             keys: {},
@@ -47,6 +45,13 @@ module.exports = class HypersignAuth {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
 
+
+        const ws = new HSWebsocket(server,
+            hsConfigJson.appCredential.credentialSubject.serviceEp,
+            hsConfigJson.appCredential.credentialSubject.did,
+            hsConfigJson.appCredential.credentialSubject.name,
+            options.schemaId);
+        ws.initiate();
 
         this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
@@ -88,7 +93,7 @@ module.exports = class HypersignAuth {
             await this.middlewareService.register(req.body);
             next();
         } catch (e) {
-            res.status(403).send(e.message);
+            res.status(500).send(e.message);
         }
     }
 
@@ -101,7 +106,7 @@ module.exports = class HypersignAuth {
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
             next();
         } catch (e) {
-            res.status(403).send(e.message);
+            res.status(500).send(e.message);
         }
     }
 

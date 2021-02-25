@@ -2,11 +2,14 @@ const WebSocket = require('websocket')
 const { clientStore } = require('./config')
 
 module.exports = class HSWebsocket {
-    constructor(server, baseUrl) {
+    constructor(server, baseUrl, appDid, appName, schemaId) {
         if (!server) throw new Error('Http server is required.')
         if (!baseUrl) throw new Error('Server baseUrl is required.')
         this.server = server;
         this.baseUrl = baseUrl;
+        this.appDid = appDid;
+        this.appName = appName;
+        this.schemaId = schemaId;
         this.checkSlash()
     }
 
@@ -31,7 +34,14 @@ module.exports = class HSWebsocket {
             const connection = request.accept(null, request.origin)
             console.log(`${TIME()} Client connected`)
             const clientId = clientStore.addClient(connection);
-            connection.sendUTF(this.getFormatedMessage('init', this.baseUrl + 'hs/api/v2/auth?challenge=' + clientId))
+            const JSONData = {
+                QRType: 'REQUEST_CRED',
+                serviceEndpoint: this.baseUrl + 'hs/api/v2/auth?challenge=' + clientId,
+                schemaId: this.schemaId,
+                appDid: this.appDid,
+                appName: this.appName
+            }
+            connection.sendUTF(this.getFormatedMessage('init', JSONData));
             connection.on('message', (m) => {})
             connection.on('close', (conn) => {
                 console.log(`${TIME()} disconnected`)
