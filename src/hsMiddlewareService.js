@@ -177,7 +177,7 @@ module.exports = class HSMiddlewareService {
             QRType: 'ISSUE_CRED',
             url: link
         });
-        const deepLinkUrl = 'https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:account?url=' + JSONdata;
+        const deepLinkUrl = encodeURI('https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:account?url=' + JSONdata);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
         const info = await this.mailService.sendEmail(user.email, mailTemplate, `${this.options.mail.name} Auth Credential Issuance`);
     }
