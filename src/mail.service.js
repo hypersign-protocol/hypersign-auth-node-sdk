@@ -28,7 +28,7 @@ module.exports = class MailService {
         const info = await this.transporter.sendMail({
             from: `${this.name} <${this.user}>`,
             to,
-            subject,
+            subject: 'No reply: ' + subject,
             html: message
         });
         return info;
