@@ -40,7 +40,7 @@ module.exports = class HypersignAuth {
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(options.jwt, jwtDefault)
-            console.log('JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
+            console.log('HS-AUTH:: JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
         } else {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
@@ -52,7 +52,7 @@ module.exports = class HypersignAuth {
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId);
         ws.initiate();
-
+        
         this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
     }

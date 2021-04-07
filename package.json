@@ -19,8 +19,8 @@
     "author": "Vishwas Anand Bhushan",
     "license": "MIT",
     "dependencies": {
+        "hs-ssi-sdk": "^5.0.0",
         "jsonwebtoken": "^8.5.1",
-        "lds-sdk": "^4.0.2",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",
         "uuid": "^8.3.2",
