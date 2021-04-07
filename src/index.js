@@ -83,6 +83,7 @@ module.exports = class HypersignAuth {
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
         } catch (e) {
+            console.log(e)
             res.status(403).send(e.message);
         }
     }
@@ -93,6 +94,7 @@ module.exports = class HypersignAuth {
             await this.middlewareService.register(req.body);
             next();
         } catch (e) {
+            console.log(e)
             res.status(500).send(e.message);
         }
     }
@@ -106,6 +108,7 @@ module.exports = class HypersignAuth {
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
             next();
         } catch (e) {
+            console.log(e)
             res.status(500).send(e.message);
         }
     }

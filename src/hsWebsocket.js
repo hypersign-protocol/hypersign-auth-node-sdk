@@ -32,7 +32,7 @@ module.exports = class HSWebsocket {
 
         wss.on('request', (request) => {
             const connection = request.accept(null, request.origin)
-            console.log(`${TIME()} Client connected`)
+            console.log(`HS-AUTH:: Client connected`)
             const clientId = clientStore.addClient(connection);
             const JSONData = {
                 QRType: 'REQUEST_CRED',
@@ -44,7 +44,7 @@ module.exports = class HSWebsocket {
             connection.sendUTF(this.getFormatedMessage('init', JSONData));
             connection.on('message', (m) => {})
             connection.on('close', (conn) => {
-                console.log(`${TIME()} disconnected`)
+                console.log(`HS-AUTH:: Client disconnected`)
             })
         })
     }
