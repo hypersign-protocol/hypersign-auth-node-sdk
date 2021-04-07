@@ -6,7 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const HypersignAuth = require('hypersign-auth-js-sdk')
 
-const port = 4000
+const port = 4006
 const app = express()
 const server = http.createServer(app)
 
