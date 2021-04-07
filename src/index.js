@@ -52,7 +52,8 @@ module.exports = class HypersignAuth {
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId);
         ws.initiate();
-        
+
+        options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
         this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
     }

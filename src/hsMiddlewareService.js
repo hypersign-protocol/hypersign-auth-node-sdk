@@ -34,6 +34,7 @@ module.exports = class HSMiddlewareService {
 
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
+        this.isSubcriptionEnabled = options.isSubcriptionEnabled;
     }
 
     sanetizeUrl(url) {
@@ -141,8 +142,11 @@ module.exports = class HSMiddlewareService {
     // Public methods
     /////////////////
     async authenticate({ challenge, vp }) {
-        await this.checkSubscription();
-        if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
+        if(this.isSubcriptionEnabled){
+            await this.checkSubscription();
+            if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
+        }
+        
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
 

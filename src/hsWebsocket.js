@@ -24,7 +24,6 @@ module.exports = class HSWebsocket {
     }
 
     initiate() {
-        const TIME = () => new Date();
         const wss = new WebSocket.server({
             httpServer: this.server, // Tieing websocket to HTTP server
             autoAcceptConnections: false
