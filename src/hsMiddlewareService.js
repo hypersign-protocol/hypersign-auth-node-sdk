@@ -4,6 +4,8 @@ const regMailTemplate = require('./mail.template');
 const MailService = require('./mail.service');
 const { clientStore } = require('./config');
 const fetch = require('node-fetch');
+const { v4: uuid4 } = require('uuid');
+
 
 
 module.exports = class HSMiddlewareService {
@@ -86,7 +88,7 @@ module.exports = class HSMiddlewareService {
             this.options.appCredential,
             issuerKeys.publicKey.id
         );
-        const challenge = hsdk.did().getChallange();
+        const challenge = uuid4();
         const signedPresentation = await this.hsSdkVC.signPresentation(presentation, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58, challenge)
         return signedPresentation
     }
