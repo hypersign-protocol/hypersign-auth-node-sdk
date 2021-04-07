@@ -1,6 +1,6 @@
 {
     "name": "hypersign-auth-js-sdk",
-    "version": "1.3.7",
+    "version": "2.0.1",
     "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
     "main": "dist/hypersign-auth-js-sdk.js",
     "scripts": {
@@ -11,10 +11,13 @@
     },
     "keywords": [
         "hypersign",
+        "HID",
         "passwordless",
         "blockchain",
         "ssi",
-        "privacy"
+        "privacy",
+        "authorization",
+        "authentication"
     ],
     "author": "Vishwas Anand Bhushan",
     "license": "MIT",

@@ -14,7 +14,7 @@ Hypersign-auth-js-sdk is javascript based SDK to implement passworless authentic
 
 ![img](demo/public/protocol2.png)
 
-For more detials about Hypersign protocol, read the [developer documentation](https://www.docs.hypersign.id) or read our whitepaper at our [website](https://hypersign.id).
+For more detials about Hypersign protocol, read the [developer documentation](https://vishwas-anand-bhushan.gitbook.io/hypersign/developer/sdk/dev-nodejs) or read our whitepaper at our [website](https://hypersign.id).
 
 ## Installation
 
@@ -30,6 +30,11 @@ To successfully intergrate Hypersign we need to do the following:
 2. The app developer implement code to show QR code on the login page
 3. Now the user will download [Hypersign Identity Mobile wallet]() and register himself. Upon registration, he will get HypersignAuth Credenital which he can use to login to websites which supports Hypersign login.
 
+
+### Pre-requisite 
+
+You must have `hypersign.json` file in root directory of your project. To generate `hypersign.json` file, please visit our [developer dashboard](https://vishwas-anand-bhushan.gitbook.io/hypersign/developer/developer-dashboard).
+
 ### Server Side
 
 Import the package 
@@ -38,22 +43,17 @@ Import the package
 const HypersignAuth = require('hypersign-auth-js-sdk')
 ```
 
-Initialise the instance
+Create the server
 
 ```js
-const options = {
-    jwtSecret: process.env.JWTSECRET || 'vErySecureSec8@#',
-    jwtExpiryTime: process.env.JWTEXPTIME || 240000, // in ms
-    hsNodeUrl: 'http://localhost:5000',
-    hsAppId: 'XXX-XXXX-XXX', // Get API key by loggin into HS studio
-    hsAppSecret: 'XXX-XXXX-XXX' // Get API secte by loggin into HS studio
-};
+const app = express()
+const server = http.createServer(app)
+```
 
-const hypersign = new HypersignAuth({
-    server, // http server,
-    baseUrl: 'http://localhost:4006', // the nodejs backend url
-    options
-});
+Initialise Hypersign instance
+
+```js
+const hypersign = new HypersignAuth(server);
 ```
 
 Expose `/hs/api/v2/auth` API and and use `hypersign.authenticate` middleware.
@@ -116,6 +116,6 @@ ws.onmessage = function({data }) {
 };
 </script>
 ```
-Get the complete implemetation demo [here](demo/README.md). You can also get detials about the Hypersign protocol from Product hunt or from our [website](https://hypermine.in/hypersign)
+Get the complete implemetation demo [here](demo/README.md). You can also get detials about the Hypersign protocol from Product hunt or from our [website](https://hypersign.id)
 
 
