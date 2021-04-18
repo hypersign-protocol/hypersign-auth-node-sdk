@@ -40,7 +40,7 @@ module.exports = class HypersignAuth {
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(options.jwt, jwtDefault)
-            console.log('JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
+            console.log('HS-AUTH:: JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
         } else {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
@@ -53,6 +53,7 @@ module.exports = class HypersignAuth {
             options.schemaId);
         ws.initiate();
 
+        options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
         this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
     }
@@ -83,6 +84,7 @@ module.exports = class HypersignAuth {
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
         } catch (e) {
+            console.log(e)
             res.status(403).send(e.message);
         }
     }
@@ -93,6 +95,7 @@ module.exports = class HypersignAuth {
             await this.middlewareService.register(req.body);
             next();
         } catch (e) {
+            console.log(e)
             res.status(500).send(e.message);
         }
     }
@@ -106,6 +109,7 @@ module.exports = class HypersignAuth {
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
             next();
         } catch (e) {
+            console.log(e)
             res.status(500).send(e.message);
         }
     }

@@ -19,7 +19,7 @@ module.exports = class MailService {
 
         this.transporter.verify((err, success) => {
             if (err) console.error(err);
-            console.log('Your config is correct');
+            console.log('HS-AUTH:: Your config is correct');
         });
 
     }

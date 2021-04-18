@@ -54,7 +54,7 @@
                 $("#qrcode").qrcode({
                     "width": 300,
                     "height": 300,
-                    "text": messageData.data
+                    "text": JSON.stringify(messageData.data)
                 });
             } else if (messageData.op == 'end') {
                 ws.close();

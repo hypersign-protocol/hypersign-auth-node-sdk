@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken');
-const hsdk = require('lds-sdk');
+const hsSdk = require('hs-ssi-sdk');
 const regMailTemplate = require('./mail.template');
 const MailService = require('./mail.service');
 const { clientStore } = require('./config');
 const fetch = require('node-fetch');
+const { v4: uuid4 } = require('uuid');
+
 
 
 module.exports = class HSMiddlewareService {
@@ -13,7 +15,8 @@ module.exports = class HSMiddlewareService {
         this.options.jwtSecret = options ? options.jwt.secret : 'secretKey';
         this.options.hsNodeUrl = options ? options.networkUrl : 'https://ssi.hypermine.in/core'
         this.options.mail = options ? options.mail : mail;
-        this.hsSdkVC = hsdk.credential({ nodeUrl: this.options.hsNodeUrl, didScheme: "did:hs" });
+        const hypersignSSISdk =  new hsSdk({nodeUrl: this.options.hsNodeUrl});
+        this.hsSdkVC = hypersignSSISdk.credential;
         this.baseUrl = baseUrl;
 
         this.baseUrl = this.sanetizeUrl(this.baseUrl);
@@ -33,6 +36,7 @@ module.exports = class HSMiddlewareService {
 
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
+        this.isSubcriptionEnabled = options.isSubcriptionEnabled;
     }
 
     sanetizeUrl(url) {
@@ -56,7 +60,7 @@ module.exports = class HSMiddlewareService {
     }
 
     async generateCredential(userData) {
-        const schemaUrl = this.options.hsNodeUrl + '/api/schema/get/' + this.options.schemaId;
+        const schemaUrl = this.options.hsNodeUrl + '/api/v1/schema/' + this.options.schemaId;
         const issuerKeys = this.options.keys;
         const { did } = userData;
 
@@ -65,20 +69,15 @@ module.exports = class HSMiddlewareService {
         delete userData['exp'];
         delete userData['did'];
 
-        // TODO:  remove this code later please.... you need to fix this in the core's
-        const attributesMap = [];
-        Object.keys(userData).forEach((attr, i) => {
-            if (i > 0) attributesMap[` ${attr}`] = userData[attr]
-            else attributesMap[attr] = userData[attr]
-        })
-
+        console.log("HS-AUTH:: Credential is being generated...")
         const credential = await this.hsSdkVC.generateCredential(schemaUrl, {
             subjectDid: did,
             issuerDid: issuerKeys.publicKey.id,
             expirationDate: new Date().toISOString(),
-            attributesMap,
+            attributesMap: userData,
         })
 
+        console.log("HS-AUTH:: Credential is being signed...")
         const signedCredential = await this.hsSdkVC.signCredential(credential, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58)
         return signedCredential
     }
@@ -89,7 +88,7 @@ module.exports = class HSMiddlewareService {
             this.options.appCredential,
             issuerKeys.publicKey.id
         );
-        const challenge = hsdk.did().getChallange();
+        const challenge = uuid4();
         const signedPresentation = await this.hsSdkVC.signPresentation(presentation, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58, challenge)
         return signedPresentation
     }
@@ -121,12 +120,11 @@ module.exports = class HSMiddlewareService {
     }
 
     async checkSubscription() {
-
         if (this.apiAuthToken == "") {
-            console.log('No API Authorization token found, authenticating using verifiable presentation');
+            console.log('HS-AUTH:: No API Authorization token found, authenticating using verifiable presentation');
             await this.callSubscriptionAPIwithPresentation();
         } else {
-            console.log('Found API Authorization token, trying to authorize');
+            console.log('HS-AUTH:: Found API Authorization token, trying to authorize');
             const developerPortalAPI = `${this.developerDashboardVerifyApi}?apiAuthToken=${this.apiAuthToken}`;
             const json = await this.fetchData(developerPortalAPI, {
                 method: 'POST',
@@ -135,7 +133,7 @@ module.exports = class HSMiddlewareService {
             if (json.status == 200) {
                 this.isSubscriptionSuccess = true;
             } else if (json.status == 403) {
-                console.log('API Authorization token has expired. Trying to authentication again using verifiable presentation');
+                console.log('HS-AUTH:: API Authorization token has expired. Trying to authentication again using verifiable presentation');
                 await this.callSubscriptionAPIwithPresentation();
             } else {
                 throw new Error(json.error);
@@ -146,15 +144,21 @@ module.exports = class HSMiddlewareService {
     // Public methods
     /////////////////
     async authenticate({ challenge, vp }) {
-        await this.checkSubscription();
-        if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
+        if(this.isSubcriptionEnabled){
+            await this.checkSubscription();
+            if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
+        }
+        
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
+
+        console.log("HS-AUTH:: Presentation is being verified...")
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
         const token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
         const client = clientStore.getClient(challenge)
         client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
         clientStore.deleteClient(client.clientId);
+        console.log("HS-AUTH:: Finished.")
         return {
             hs_userdata: subject,
             hs_authorizationToken: token
