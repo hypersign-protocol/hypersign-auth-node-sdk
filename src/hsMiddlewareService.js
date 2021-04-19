@@ -31,7 +31,7 @@ module.exports = class HSMiddlewareService {
         this.options.appCredential = options.appCredential;
         this.developerDashboardVerifyApi = `${this.sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
 
-        this.mailService = this.options.mail ? new MailService({...this.options.mail }) : null;
+        this.mailService = this.options.mail && this.options.mail.host != "" ? new MailService({...this.options.mail }) : null;
 
 
         this.apiAuthToken = "";
@@ -143,7 +143,8 @@ module.exports = class HSMiddlewareService {
 
     // Public methods
     /////////////////
-    async authenticate({ challenge, vp }) {
+    async authenticate(body) {
+        const { challenge, vp } = body;
         if(this.isSubcriptionEnabled){
             await this.checkSubscription();
             if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
@@ -171,6 +172,10 @@ module.exports = class HSMiddlewareService {
 
 
     async register(user) {
+        if(!this.mailService) throw new Error("Mail configuration is not defined");
+        
+        if(!user)  throw new Error("User object is null or empty.")
+
         const token = await jwt.sign(user, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime })
         let link = `${this.baseUrl}/hs/api/v2/credential?token=${token}`;
         let mailTemplate = regMailTemplate;
@@ -183,6 +188,8 @@ module.exports = class HSMiddlewareService {
         });
         const deepLinkUrl = encodeURI('https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:deeplink?url=' + JSONdata);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
+        
+        if(!user.email) throw new Error("No email is passed. Email is required property");
         const info = await this.mailService.sendEmail(user.email, mailTemplate, `${this.options.mail.name} Auth Credential Issuance`);
     }
 
