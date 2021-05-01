@@ -1,5 +1,8 @@
 const WebSocket = require('websocket')
 const { clientStore } = require('./config')
+const { getFormatedMessage } =  require('./utils');
+
+
 
 module.exports = class HSWebsocket {
     constructor(server, baseUrl, appDid, appName, schemaId) {
@@ -16,13 +19,7 @@ module.exports = class HSWebsocket {
     checkSlash() {
         if (!this.baseUrl.endsWith('/')) this.baseUrl = this.baseUrl + '/';
     }
-    getFormatedMessage(op, data) {
-        return JSON.stringify({
-            op,
-            data
-        })
-    }
-
+    
     initiate() {
         const wss = new WebSocket.server({
             httpServer: this.server, // Tieing websocket to HTTP server
@@ -32,7 +29,10 @@ module.exports = class HSWebsocket {
         wss.on('request', (request) => {
             const connection = request.accept(null, request.origin)
             console.log(`HS-AUTH:: Client connected`)
+            
             const clientId = clientStore.addClient(connection);
+            clientStore.emit('startTimer', {clientId: clientId, time: 30000})
+            
             const JSONData = {
                 QRType: 'REQUEST_CRED',
                 serviceEndpoint: this.baseUrl + 'hs/api/v2/auth?challenge=' + clientId,
@@ -40,10 +40,15 @@ module.exports = class HSWebsocket {
                 appDid: this.appDid,
                 appName: this.appName
             }
-            connection.sendUTF(this.getFormatedMessage('init', JSONData));
-            connection.on('message', (m) => {})
-            connection.on('close', (conn) => {
-                console.log(`HS-AUTH:: Client disconnected`)
+            connection.sendUTF(getFormatedMessage('init', JSONData));
+            connection.on('message', (m) => {
+
+            })
+            connection.on('close', (conn, clientId) => {
+                if(conn == 4001 && clientId) {
+                    clientStore.emit('deleteClient', { clientId });
+                }
+                console.log(`HS-AUTH:: Client disconnected`)                
             })
         })
     }

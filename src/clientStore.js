@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
-
+const EventEmitter = require('events');
 
 class Client {
     constructor(connection) {
@@ -8,13 +8,16 @@ class Client {
     }
 }
 
-module.exports = class ClientStore {
 
-    constructor() {}
+module.exports = class ClientStore extends EventEmitter{
+    constructor() {        
+        super();
+        this.clients = {} //in-mem store
+    }
+
     addClient(connection) {
         if (!connection) throw new Error('Connection is null')
         const client = new Client(connection);
-        this.clients = {} //in-mem store
         this.clients[client.clientId] = client;
         return client.clientId;
     }
@@ -34,4 +37,5 @@ module.exports = class ClientStore {
     getAllClientIds() {
         return Object.keys(this.clients)
     }
+
 }
