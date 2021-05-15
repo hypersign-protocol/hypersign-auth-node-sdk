@@ -2,7 +2,10 @@ const HSWebsocket = require('./hsWebsocket');
 const HSMiddlewareService = require('./hsMiddlewareService');
 const fs = require('fs');
 const path = require('path');
-const HYPERSIGN_CONFIG_FILE = 'hypersign.json'
+const { clientStore } = require('./config');
+
+const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
+
 module.exports = class HypersignAuth {
 
     constructor(server) {
@@ -46,17 +49,30 @@ module.exports = class HypersignAuth {
         }
 
 
-        const ws = new HSWebsocket(server,
+        this.ws = new HSWebsocket(server,
             hsConfigJson.appCredential.credentialSubject.serviceEp,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId);
-        ws.initiate();
+        this.ws.initiate();
 
         options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
         this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
     }
+
+
+    extractToken(req) {
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+            return req.headers.authorization.split(' ')[1];
+        } else if (req.query && req.query.token) {
+            return req.query.token;
+        }
+        return null;
+    }
+
+    // Public methods
+    //////////////////
 
     async authenticate(req, res, next) {
         try {
@@ -68,15 +84,7 @@ module.exports = class HypersignAuth {
         }
     }
 
-    extractToken(req) {
-        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-            return req.headers.authorization.split(' ')[1];
-        } else if (req.query && req.query.token) {
-            return req.query.token;
-        }
-        return null;
-    }
-
+    
     async authorize(req, res, next) {
         try {
             const authToken = this.extractToken(req);
@@ -107,6 +115,21 @@ module.exports = class HypersignAuth {
             if (!authToken) throw new Error('Registration token is not passed in the in query')
             if (!userDid) throw new Error('User Did is not passed in the in query')
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
+            next();
+        } catch (e) {
+            console.log(e)
+            res.status(500).send(e.message);
+        }
+    }
+
+    async newSession(req, res, next){
+        try {
+            const { baseUrl } = req.body;
+            if(!baseUrl) throw new Error("BaseUrl is not passed");
+            const clientId = clientStore.addClient(null);
+            clientStore.emit('startTimer', {clientId: clientId, time: 60000});
+            const QRData = this.ws.getQRData(baseUrl, clientId);
+            req.body.qrData = QRData;
             next();
         } catch (e) {
             console.log(e)

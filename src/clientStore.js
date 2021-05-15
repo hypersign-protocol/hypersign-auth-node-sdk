@@ -16,7 +16,7 @@ module.exports = class ClientStore extends EventEmitter{
     }
 
     addClient(connection) {
-        if (!connection) throw new Error('Connection is null')
+        // if (!connection) throw new Error('Connection is null')
         const client = new Client(connection);
         this.clients[client.clientId] = client;
         return client.clientId;

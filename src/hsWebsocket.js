@@ -13,11 +13,29 @@ module.exports = class HSWebsocket {
         this.appDid = appDid;
         this.appName = appName;
         this.schemaId = schemaId;
-        this.checkSlash()
+        
     }
 
-    checkSlash() {
-        if (!this.baseUrl.endsWith('/')) this.baseUrl = this.baseUrl + '/';
+    getQRData(baseUrl, challenge){
+        baseUrl = this.checkSlash(baseUrl);
+        const JSONData = {
+            QRType: 'REQUEST_CRED',
+            serviceEndpoint:  baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
+            schemaId: this.schemaId,
+            appDid: this.appDid,
+            appName: this.appName
+        }
+
+        return JSONData;
+    }
+
+    checkSlash(baseUrl) {
+        if(!baseUrl) throw new Error("baseUrl is null or empty");
+        baseUrl = baseUrl.trim();
+        if (!baseUrl.endsWith('/')) 
+            return baseUrl + '/';
+        else
+            return baseUrl;
     }
     
     initiate() {
@@ -25,21 +43,16 @@ module.exports = class HSWebsocket {
             httpServer: this.server, // Tieing websocket to HTTP server
             autoAcceptConnections: false
         })
-
+        const that =  this;
         wss.on('request', (request) => {
             const connection = request.accept(null, request.origin)
             console.log(`HS-AUTH:: Client connected`)
             
             const clientId = clientStore.addClient(connection);
-            clientStore.emit('startTimer', {clientId: clientId, time: 30000})
+            clientStore.emit('startTimer', {clientId: clientId, time: 60000});
             
-            const JSONData = {
-                QRType: 'REQUEST_CRED',
-                serviceEndpoint: this.baseUrl + 'hs/api/v2/auth?challenge=' + clientId,
-                schemaId: this.schemaId,
-                appDid: this.appDid,
-                appName: this.appName
-            }
+            const JSONData = that.getQRData(this.baseUrl ,clientId);
+
             connection.sendUTF(getFormatedMessage('init', JSONData));
             connection.on('message', (m) => {
 

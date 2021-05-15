@@ -7,7 +7,7 @@ const path = require('path');
 const HypersignAuth = require('hypersign-auth-js-sdk');
 // import HypersignAuth from 'hypersign-auth-js-sdk';
 
-const port = 4000
+const port = 3003
 const app = express()
 const server = http.createServer(app)
 
@@ -50,6 +50,10 @@ app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
     } catch (e) {
         res.status(500).send(e.message)
     }
+})
+
+app.post('/challenge', hypersign.newSession.bind(hypersign), (req, res) => {
+    res.status(200).send(req.body);
 })
 
 server.listen(port, () => {
