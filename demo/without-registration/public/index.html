@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.qrcode@1.0.3/jquery.qrcode.min.js"></script>
     <title>Hypersign Login Demo</title>
 </head>
@@ -69,7 +69,7 @@
                 ws.close();
                 $("#qrcode").hide();
                 const authorizationToken = messageData.data.token
-                const url = `http://${window.location.host}/protected`
+                const url = `https://${window.location.host}/protected`
                 console.log(url)
                 fetch(url, {
                         headers: {
