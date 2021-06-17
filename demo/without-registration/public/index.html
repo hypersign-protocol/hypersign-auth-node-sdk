@@ -41,7 +41,7 @@
             return;
         }
 
-        let ws = new WebSocket(`ws://${window.location.host}`);
+        let ws = new WebSocket(`wss://${window.location.host}`);
         ws.onopen = function() {};
 
         ws.onmessage = function({
