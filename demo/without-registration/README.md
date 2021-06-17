@@ -6,11 +6,11 @@
 node server.js
 ```
 
-The server will run on port `4006`
+The server will run on port `3003`. It will first generate certificates in localhost.
 
 ## Browse the client
 
-Go to browser and hit the url `http://localhost:4006`. You will see the QR code.
+Go to browser and hit the url `https://localhost:3003`. You will see the QR code.
 
 ![QR](public/QR-demo.png)
 
