@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.qrcode@1.0.3/jquery.qrcode.min.js"></script>
     <title>Hypersign Login Demo</title>
 </head>
@@ -14,7 +14,8 @@
         <div id="qrcode">
             <img src='loader.gif' />
         </div>
-        <a href="/register">Register</a>
+        <p>OR</p>
+        <p class="web"></p>
         <div id="profile"></div>
     </div>
 </body>
@@ -40,7 +41,7 @@
             return;
         }
 
-        let ws = new WebSocket(`ws://${window.location.host}`);
+        let ws = new WebSocket(`wss://${window.location.host}`);
         ws.onopen = function() {};
 
         ws.onmessage = function({
@@ -51,16 +52,24 @@
             $("#qrcode").html("");
             $('#profile').html('');
             if (messageData.op == 'init') {
+                const qrData = JSON.stringify(messageData.data);
+
+                // Display the QR code to use with mobile app
                 $("#qrcode").qrcode({
                     "width": 300,
                     "height": 300,
-                    "text": JSON.stringify(messageData.data)
+                    "text": qrData
                 });
+
+                // OR use web wallet
+                const weblink = encodeURI("https://hswallet-stage.netlify.app/deeplink?url=" + qrData);
+                $(".web").html(` <button onclick="window.open('${weblink}', 'popUpWindow','height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">USE WEB WALLET</button>`)
+
             } else if (messageData.op == 'end') {
                 ws.close();
                 $("#qrcode").hide();
                 const authorizationToken = messageData.data.token
-                const url = `http://${window.location.host}/protected`
+                const url = `https://${window.location.host}/protected`
                 console.log(url)
                 fetch(url, {
                         headers: {
@@ -80,7 +89,14 @@
                     .catch((e) => {
                         console.log(e)
                     })
-            }
+            } 
+            
+            // else if (messageData.op == 'reload') {
+            //     console.log(messageData.data.clientId);
+            //     // ws.close(4001, messageData.data.clientId);
+            //     // window.location.reload()
+
+            // }
         };
 
         ws.onerror = function(error) {};

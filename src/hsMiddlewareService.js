@@ -157,7 +157,11 @@ module.exports = class HSMiddlewareService {
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
         const token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
         const client = clientStore.getClient(challenge)
-        client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
+
+        if(client.connection){
+            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
+        }
+        
         clientStore.deleteClient(client.clientId);
         console.log("HS-AUTH:: Finished.")
         return {
