@@ -185,7 +185,7 @@ module.exports = class HSMiddlewareService {
             
             if(!did) throw new Error("Did must be passed with thirdparty auth request");
             
-            const verifiableCredential = await this.generateCredential(data);
+            const verifiableCredential = await this.generateCredential(user);
             return verifiableCredential;
         }
 
