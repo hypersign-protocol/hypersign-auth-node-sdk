@@ -17,6 +17,8 @@
         <p>OR</p>
         <p class="web"></p>
         <div id="profile"></div>
+
+        <!-- <button onclick="openWindow()">Login using web wallet</button> -->
     </div>
 </body>
 
@@ -25,6 +27,14 @@
         initiate();
 
     });
+
+    function openWindow(){
+        const w = window.open(
+          `${window.location.protocol + "//" + window.location.host}/xyz.html`,
+          "popUpWindow",
+          `height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes`
+        );
+    }
 
     function formattedMessage(m) {
         return JSON.stringify({

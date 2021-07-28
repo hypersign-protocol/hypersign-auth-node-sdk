@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
 const HypersignAuth = require('hypersign-auth-js-sdk');
-
+/////
 const httpsLocalhost = require("https-localhost")();
 
 // Ref: https://github.com/daquinoaldo/https-localhost#use-as-module
@@ -27,6 +27,8 @@ httpsLocalhost.getCerts().then(cert => {
     app.use(bodyParser.json());
     app.use(cors());
     app.use(cookieParser());
+
+    app.use(express.static('public'))
     
     const hypersign = new HypersignAuth(server);
     
@@ -48,8 +50,15 @@ httpsLocalhost.getCerts().then(cert => {
             res.status(500).send({ status: 500, message: null, error: e.message });
         }
     })
+
+    app.get('/test',function(req,res){
+        // res.json({"message": "success"});
+        // res.redirect('https://localhost:3003/home.html');
+      });
     
     
+    
+
     // Protected resource
     // Must pass hs_authorizationToken in x-auth-token header
     app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {

@@ -44,11 +44,15 @@ module.exports = class HSWebsocket {
             autoAcceptConnections: false
         })
         const that =  this;
-        wss.on('request', (request) => {
+        wss.on('request', async (request) => {
             const connection = request.accept(null, request.origin)
             console.log(`HS-AUTH:: Client connected`)
             
-            const clientId = clientStore.addClient(connection);
+            console.log(`HS-AUTH:: adding redis client`)
+
+            console.log(connection)
+
+            const clientId = await clientStore.addClient(connection);
             clientStore.emit('startTimer', {clientId: clientId, time: 60000});
             
             const JSONData = that.getQRData(this.baseUrl ,clientId);

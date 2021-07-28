@@ -1,11 +1,14 @@
 const ClientStore = require('./clientStore')
+const ClientStoreRedis =  require('./clientStoreRedis');
 const { getFormatedMessage } =  require('./utils');
 
-const clientStore = new ClientStore();
+const clientStore = new ClientStoreRedis();
 
-clientStore.on('startTimer', (args) => {
+clientStore.on('startTimer', async (args) => {
     const { clientId, time } = args;
-    const { connection } = clientStore.getClient(clientId)
+    console.log("HSAuth: startTimer " + clientId)
+    console.log("HSAuth: startTimer " + time)
+    const { connection } = await clientStore.getClient(clientId)
     if(connection){
         setTimeout(() => {
             connection.sendUTF(getFormatedMessage('reload', { clientId }));
@@ -15,6 +18,7 @@ clientStore.on('startTimer', (args) => {
 
 clientStore.on('deleteClient', (args) => {
     const { clientId } =  args;
+    console.log("HSAuth: deleteClient " + clientId)
     clientStore.deleteClient(clientId);
 })
 

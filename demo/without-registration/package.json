@@ -4,6 +4,7 @@
     "description": "A simple chat app on websocket",
     "main": "index.js",
     "scripts": {
+        "dev": "nodemon server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Vishwas Anand Bhushan",
@@ -15,6 +16,7 @@
         "hypersign-auth-js-sdk": "^2.0.4"
     },
     "devDependencies": {
-        "https-localhost": "^4.6.5"
+        "https-localhost": "^4.6.5",
+        "nodemon": "^2.0.12"
     }
 }
