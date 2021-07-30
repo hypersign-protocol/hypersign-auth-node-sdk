@@ -175,10 +175,19 @@ module.exports = class HSMiddlewareService {
     }
 
 
-    async register(user) {
+    async register(user, isThridPartyAuth = false) {
         if(!this.mailService) throw new Error("Mail configuration is not defined");
         
         if(!user)  throw new Error("User object is null or empty.")
+
+        if(isThridPartyAuth){
+            const { did } = user;
+            
+            if(!did) throw new Error("Did must be passed with thirdparty auth request");
+            
+            const verifiableCredential = await this.generateCredential(user);
+            return verifiableCredential;
+        }
 
         const token = await jwt.sign(user, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime })
         let link = `${this.baseUrl}/hs/api/v2/credential?token=${token}`;
@@ -195,6 +204,7 @@ module.exports = class HSMiddlewareService {
         
         if(!user.email) throw new Error("No email is passed. Email is required property");
         const info = await this.mailService.sendEmail(user.email, mailTemplate, `${this.options.mail.name} Auth Credential Issuance`);
+        return null;
     }
 
     async getCredential(token, userDid) {

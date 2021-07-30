@@ -99,8 +99,11 @@ module.exports = class HypersignAuth {
 
     async register(req, res, next) {
         try {
-            if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')
-            await this.middlewareService.register(req.body);
+            if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')            
+            const vc = await this.middlewareService.register(req.body["user"], req.body["isThridPartyAuth"]? req.body["isThridPartyAuth"]: false );
+            if(vc){
+                req.body.verifiableCredential = vc;
+            }
             next();
         } catch (e) {
             console.log(e)
