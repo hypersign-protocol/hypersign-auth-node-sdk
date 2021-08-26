@@ -4,18 +4,27 @@ const { getFormatedMessage } =  require('./utils');
 const clientStore = new ClientStore();
 
 clientStore.on('startTimer', (args) => {
-    const { clientId, time } = args;
-    const { connection } = clientStore.getClient(clientId)
-    if(connection){
-        setTimeout(() => {
-            connection.sendUTF(getFormatedMessage('reload', { clientId }));
-        }, time)
-    }        
+    try{
+        const { clientId, time } = args;
+        const { connection } = clientStore.getClient(clientId)
+        if(connection){
+            setTimeout(() => {
+                connection.sendUTF(getFormatedMessage('reload', { clientId }));
+                clientStore.emit('deleteClient', { clientId });
+            }, time)
+        }        
+    }catch(e){
+        console.log(e);
+    }
 })
 
 clientStore.on('deleteClient', (args) => {
-    const { clientId } =  args;
-    clientStore.deleteClient(clientId);
+    try{
+        const { clientId } =  args;
+        clientStore.deleteClient(clientId);
+    }catch(e){
+        console.log(e);
+    }
 })
 
 module.exports = {
