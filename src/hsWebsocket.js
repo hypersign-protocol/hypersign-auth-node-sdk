@@ -5,7 +5,7 @@ const { getFormatedMessage } =  require('./utils');
 
 
 module.exports = class HSWebsocket {
-    constructor(server, baseUrl, appDid, appName, schemaId) {
+    constructor(server, baseUrl, appDid, appName, schemaId, socketConnectionTimeOut = 60000) {
         if (!server) throw new Error('Http server is required.')
         if (!baseUrl) throw new Error('Server baseUrl is required.')
         this.server = server;
@@ -13,7 +13,7 @@ module.exports = class HSWebsocket {
         this.appDid = appDid;
         this.appName = appName;
         this.schemaId = schemaId;
-        
+        this.socketConnectionTimeOut = socketConnectionTimeOut;
     }
 
     getQRData(baseUrl, challenge){
@@ -49,7 +49,7 @@ module.exports = class HSWebsocket {
             console.log(`HS-AUTH:: Client connected`)
             
             const clientId = clientStore.addClient(connection);
-            clientStore.emit('startTimer', {clientId: clientId, time: 60000});
+            clientStore.emit('startTimer', {clientId: clientId, time: this.socketConnectionTimeOut});
             
             const JSONData = that.getQRData(this.baseUrl ,clientId);
 

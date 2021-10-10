@@ -53,7 +53,8 @@ module.exports = class HypersignAuth {
             hsConfigJson.appCredential.credentialSubject.serviceEp,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
-            options.schemaId);
+            options.schemaId,
+            hsConfigJson.socketConnTimeOut);
         this.ws.initiate();
 
         options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
