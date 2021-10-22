@@ -6,13 +6,16 @@ const { clientStore } = require('./config');
 const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
 
+const Did_store=require('./store')
 
-
+const did_store= new Did_store()
 module.exports = class HSMiddlewareService {
     constructor(options = {}, baseUrl) {
         this.options = {};
         this.options.jwtExpiryTime = options ? options.jwt.expiryTime : 240000;
+        this.options.rftokenExpiryTime = options ? options.rft.expiryTime : 1000;
         this.options.jwtSecret = options ? options.jwt.secret : 'secretKey';
+        this.options.rftokenSecret=options ? options.rft.secret :'8e5507e12da789f3c3bd640711378201d658657999384061bb';
         this.options.hsNodeUrl = options ? options.networkUrl : 'https://ssi.hypermine.in/core'
         this.options.mail = options ? options.mail : mail;
         const hypersignSSISdk =  new hsSdk({nodeUrl: this.options.hsNodeUrl});
@@ -155,23 +158,89 @@ module.exports = class HSMiddlewareService {
 
         console.log("HS-AUTH:: Presentation is being verified...")
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
-        const token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
+        const auth_token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
+        const refresh_token=await jwt.sign(subject,this.options.rftokenSecret,{ expiresIn: this.options.rftokenExpiryTime })
         const client = clientStore.getClient(challenge)
-
+       
+        await did_store.set(subject.id,{auth_token,refresh_token,subject})
+        
         if(client.connection){
-            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
+            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens:{auth_token,refresh_token} }))
         }
         
         clientStore.deleteClient(client.clientId);
         console.log("HS-AUTH:: Finished.")
         return {
-            hs_userdata: subject,
-            hs_authorizationToken: token
+            user: subject,
+            auth_token: auth_token,
+            refresh_token:refresh_token,
         }
     }
 
+   async verifyRfToken(did,refresh_token){
+        return new Promise((resovle,reject)=>{
+            const did_tokens=did_store.get(did)
+            if(refresh_token===did_tokens.refresh_token){
+                resovle(true)
+            }else{
+                reject(new Error("Refresh Token Error: Token Not Found "))
+            }
+        })
+    }
+
+
+    async issueCredentialFresh(subject){
+        return new Promise(async (resolve, reject)=>{
+            try{
+                const did_exists=await did_store.has(subject.id);
+                if(did_exists){ 
+                    await did_store.delete(subject.id);
+                    const auth_token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
+                    const refresh_token=await jwt.sign(subject,this.options.rftokenSecret,{ expiresIn: this.options.rftokenExpiryTime })
+                    await did_store.set(subject.id,{auth_token,refresh_token,subject})
+                    resolve( {
+                        user: subject,
+                        auth_token: auth_token,
+                        refresh_token:refresh_token,
+                    })
+                }else{
+                    reject(new Error("Error : did Does not Exist"))
+                }
+            }catch(e){
+                reject(e) 
+            }
+        })
+    }
+
+
+    async verifydid(did){
+        
+        return new Promise(async(resove,reject)=>{
+            const status= did_store.has(did)
+            
+            if(status){
+                resove(await did_store.get(did).subject);
+            }else{
+                reject(new Error("User :did not Found"))
+            }
+        })
+    }
+    async refresh(jwt_token,refresh_token){
+      
+        return ({
+            authorizationToken:jwt_token,
+            refreshToken:refresh_token
+        })
+    }
+
+    async decode(token){
+        return await jwt.decode(token)
+    }
     async authorize(authToken) {
-        return await jwt.verify(authToken, this.options.jwtSecret)
+        return await  jwt.verify(authToken, this.options.jwtSecret)
+    }
+    async authorizeRf(refreshToken) {
+        return await  jwt.verify(refreshToken, this.options.rftokenSecret)
     }
 
 

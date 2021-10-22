@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { clientStore } = require('./config');
 
+
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
 
 module.exports = class HypersignAuth {
@@ -12,11 +13,13 @@ module.exports = class HypersignAuth {
         ////
         // Making it backward compatible
         const hsFilePath = path.join(__dirname, '../../../', HYPERSIGN_CONFIG_FILE);
-        if (!fs.existsSync(hsFilePath)) throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; filePath = ' + hsFilePath);
+        const hsFilePathDev=path.join(__dirname,'../', HYPERSIGN_CONFIG_FILE)
+        if (!fs.existsSync(hsFilePath)&& !fs.existsSync(hsFilePathDev)) throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; filePath = ' + hsFilePath);
 
         const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
+        
         const hsConfigJson = JSON.parse(hypersignConfig);
-
+        
         if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
         if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
@@ -27,6 +30,7 @@ module.exports = class HypersignAuth {
             keys: {},
             mail: {},
             jwt: {},
+            rft:{},
             appCredential: {}
         };
         Object.assign(options.mail, hsConfigJson.mail);
@@ -47,7 +51,16 @@ module.exports = class HypersignAuth {
         } else {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
-
+        if (!hsConfigJson.rft) {
+            const rftDefault = {
+                secret: 'BadsecretKey1@',
+                expiryTime: '900s' // epires in 15 mins
+            }
+            Object.assign(options.rft, rftDefault)
+            console.log('HS-AUTH:: Refresh Token configuration not passed. Taking default configuration.. Secret = ' + rftDefault.secret + ' ExpiryTime = ' + rftDefault.expiryTime)
+        } else {
+            Object.assign(options.rft, hsConfigJson.rft)
+        }
 
         this.ws = new HSWebsocket(server,
             hsConfigJson.appCredential.credentialSubject.serviceEp,
@@ -71,7 +84,13 @@ module.exports = class HypersignAuth {
         }
         return null;
     }
-
+    extractRfToken(req) {
+        if (req.headers.refresh_token && req.headers.refresh_token.split(' ')[0] === 'Bearer') {
+            return req.headers.refresh_token.split(' ')[1];
+        
+        }
+        return null;
+    }
     // Public methods
     //////////////////
 
@@ -82,6 +101,62 @@ module.exports = class HypersignAuth {
         } catch (e) {
             console.log(e)
             res.status(401).send(e.message);
+        }
+    }
+
+    
+
+
+
+    async refresh(req ,res ,next){
+        try {
+            
+            const jwt_token = this.extractToken(req);
+            if(!jwt_token)throw new Error("Authorization Token is not sent to header")
+            const refresh_token= this.extractRfToken(req);
+            if(!refresh_token)throw new Error("Refresh Token is not sent to header")
+            const auth_data_rft=await this.middlewareService.authorizeRf(refresh_token)         
+            try{
+             const auth_data_jwt=await this.middlewareService.authorize(jwt_token)
+                throw new Error("Jwt Not Expired, Cant Refresh")
+            } catch(e){
+              if(e.message==="jwt expired"){
+                try {
+                    let decode_jwt=await this.middlewareService.decode(jwt_token)
+                       const subject= await this.middlewareService.verifydid(decode_jwt.id) 
+                       
+                        //if did doesnot exists it will never come to this line will get rejected from pervious line 
+                        await this.middlewareService.verifyRfToken(decode_jwt.id,refresh_token);
+                        req.body.freshCredential=await this.middlewareService.issueCredentialFresh(subject); 
+                        //ToDo: delete refresh token and jwt and issue new ones
+                    } catch (error) {
+                        
+                            throw error;             
+                    }    
+                    
+              }else{
+                  throw e;
+              }
+           
+            }
+           // const rft_sign_status=this.middlewareService.authorizeRf(refresh_token)
+
+            
+           // console.log(jwt_sign_status , rft_sign_status);
+           // expire detection 
+           // check integrity
+           // check local store
+           //chcek did
+           
+            //req.body.hsFreshTokens=await this.middlewareService.refresh(jwt_token,refresh_token);
+         
+            next()
+            // this.middlewareService.refresh(jwt_token,)
+
+        } catch (error) {
+            console.log(error);
+            //throw error;
+            res.status(401).send(error.message)
         }
     }
 
@@ -97,6 +172,7 @@ module.exports = class HypersignAuth {
             res.status(403).send(e.message);
         }
     }
+
 
     async register(req, res, next) {
         try {

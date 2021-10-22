@@ -27,7 +27,7 @@ httpsLocalhost.getCerts().then(cert => {
     app.use(bodyParser.json());
     app.use(cors());
     app.use(cookieParser());
-    
+    app.use(express.static("public"))
     const hypersign = new HypersignAuth(server);
     
     // Unprotected resource, may be to show login page
@@ -49,6 +49,16 @@ httpsLocalhost.getCerts().then(cert => {
         }
     })
     
+    app.post('/rf',hypersign.refresh.bind(hypersign),(req,res,)=>{
+        try {    
+            const user = req.body.freshCredential;
+            console.log(user);
+                // Do whatever you want to do with it
+            res.status(200).send({ status: 200, message: user, error: null });
+        } catch (e) {
+            res.status(500).send(e.message)
+        }
+    })
     
     // Protected resource
     // Must pass hs_authorizationToken in x-auth-token header
