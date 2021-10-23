@@ -1,14 +1,12 @@
 const jwt = require('jsonwebtoken');
 const hsSdk = require('hs-ssi-sdk');
-const regMailTemplate = require('./mail.template');
-const MailService = require('./mail.service');
-const { clientStore } = require('./config');
+const regMailTemplate = require('./mail/mail.template');
+const MailService = require('./mail/mail.service');
+const { clientStore, tokenStore } = require('./config');
 const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
 
-const TokenStore = require('./tokenStore')
 
-const tokenStore= new TokenStore()
 module.exports = class HSMiddlewareService {
     constructor(options = {}, baseUrl) {
         this.options = {};

@@ -43,7 +43,7 @@ module.exports = class HSWebsocket {
             httpServer: this.server, // Tieing websocket to HTTP server
             autoAcceptConnections: false
         })
-        const that =  this;
+        const that = this;
         wss.on('request', (request) => {
             const connection = request.accept(null, request.origin)
             console.log(`HS-AUTH:: Client connected`)

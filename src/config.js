@@ -1,7 +1,10 @@
-const ClientStore = require('./clientStore')
+const ClientStore = require('./store/clientStore')
+const TokenStore = require('./store/tokenStore')
+
 const { getFormatedMessage } =  require('./utils');
 
 const clientStore = new ClientStore();
+const tokenStore = new TokenStore()
 
 clientStore.on('startTimer', (args) => {
     try{
@@ -28,5 +31,6 @@ clientStore.on('deleteClient', (args) => {
 })
 
 module.exports = {
-    clientStore
+    clientStore,
+    tokenStore
 }
