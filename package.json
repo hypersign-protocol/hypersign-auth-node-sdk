@@ -5,9 +5,9 @@
     "main": "dist/hypersign-auth-js-sdk.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "webpack -p",
-        "build:dev": "webpack --mode=development",
-        "prepare": "npm run build",
+        "build": "npm run prettier && webpack -p",
+        "build:dev": "npm run prettier && webpack --mode=development",
+        "prepare": "npm run prettier && npm run build",
         "prettier": "prettier --config .prettierrc.json --write src/**/*.js"
     },
     "keywords": [
