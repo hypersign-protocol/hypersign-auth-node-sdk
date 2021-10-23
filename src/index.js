@@ -1,5 +1,5 @@
 const HSWebsocket = require('./hsWebsocket');
-const HSMiddlewareService = require('./hsMiddlewareService');
+const HypersignAuthService = require('./hsAuthService');
 const fs = require('fs');
 const path = require('path');
 const { clientStore } = require('./config');
@@ -71,7 +71,7 @@ module.exports = class HypersignAuth {
         this.ws.initiate();
 
         options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
-        this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
+        this.middlewareService = new HypersignAuthService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
 
     }
 

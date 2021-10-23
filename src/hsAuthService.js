@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
 
 
-module.exports = class HSMiddlewareService {
+module.exports = class HypersignAuthService {
     constructor(options = {}, baseUrl) {
         this.options = {};
         this.options.jwtExpiryTime = options ? options.jwt.expiryTime : 240000;
