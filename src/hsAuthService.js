@@ -3,8 +3,8 @@ const hsSdk = require('hs-ssi-sdk');
 const regMailTemplate = require('./mail/mail.template');
 const MailService = require('./mail/mail.service');
 const { clientStore, tokenStore, logger } = require('./config');
-const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
+const { sanetizeUrl, getFormatedMessage, fetchData } = require('./utils');
 
 
 module.exports = class HypersignAuthService {
@@ -20,8 +20,8 @@ module.exports = class HypersignAuthService {
         this.hsSdkVC = hypersignSSISdk.credential;
         this.baseUrl = baseUrl;
 
-        this.baseUrl = this.sanetizeUrl(this.baseUrl);
-        this.options.hsNodeUrl = this.sanetizeUrl(this.options.hsNodeUrl)
+        this.baseUrl =  sanetizeUrl(this.baseUrl);
+        this.options.hsNodeUrl =  sanetizeUrl(this.options.hsNodeUrl)
 
         this.options.keys = options.keys;
         this.options.schemaId = options.schemaId;
@@ -30,7 +30,7 @@ module.exports = class HypersignAuthService {
 
 
         this.options.appCredential = options.appCredential;
-        this.developerDashboardVerifyApi = `${this.sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
+        this.developerDashboardVerifyApi = `${ sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
 
         this.mailService = this.options.mail && this.options.mail.host != "" ? new MailService({...this.options.mail }) : null;
 
@@ -38,13 +38,6 @@ module.exports = class HypersignAuthService {
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
-    }
-
-    sanetizeUrl(url) {
-        if (!url) throw new Error("Url is empty");
-        if (url.substr(url.length - 1) == '/') {
-            return url.substr(0, url.length - 1)
-        } else return url;
     }
 
     async verifyPresentation(vpObj, challenge) {
@@ -94,15 +87,9 @@ module.exports = class HypersignAuthService {
         return signedPresentation
     }
 
-    async fetchData(url, options) {
-        const resp = await fetch(url, options)
-        const json = await resp.json();
-        return json;
-    }
-
     async callSubscriptionAPIwithPresentation() {
         const data = await this.generatePresentation();
-        const json = await this.fetchData(this.developerDashboardVerifyApi, {
+        const json = await fetchData(this.developerDashboardVerifyApi, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -127,7 +114,7 @@ module.exports = class HypersignAuthService {
         } else {
             logger.debug('HS-AUTH:: Found API Authorization token, trying to authorize');
             const developerPortalAPI = `${this.developerDashboardVerifyApi}?apiAuthToken=${this.apiAuthToken}`;
-            const json = await this.fetchData(developerPortalAPI, {
+            const json = await fetchData(developerPortalAPI, {
                 method: 'POST',
             });
 
@@ -142,8 +129,18 @@ module.exports = class HypersignAuthService {
         }
     }
 
+    async verifyRefreshToken(refreshToken) {
+        return await jwt.verify(refreshToken, this.options.rftokenSecret)
+    }
+
     // Public methods
     /////////////////
+
+    /**
+     * Authenticates user's credentials
+     * @param { object } body 
+     * @returns accessToken and refreshToken
+     */
     async authenticate(body) {
         const { challenge, vp } = body;
         if(this.isSubcriptionEnabled){
@@ -170,7 +167,7 @@ module.exports = class HypersignAuthService {
         const client = clientStore.getClient(challenge)
        
         if(client.connection){
-            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens: { accessToken, refreshToken }}))
+            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens: { accessToken, refreshToken }}))
         }
         
         clientStore.deleteClient(client.clientId);
@@ -186,11 +183,11 @@ module.exports = class HypersignAuthService {
         }
     }
 
-   
-    async verifyRefreshToken(refreshToken) {
-        return await jwt.verify(refreshToken, this.options.rftokenSecret)
-    }
-    
+    /**
+     * Verifies old refresh token and generates a new pair
+     * @param { string } refreshToken 
+     * @returns accessToken and refreshToken
+     */
     async refresh(refreshToken){
         const payload = await this.verifyRefreshToken(refreshToken)
 
@@ -218,16 +215,31 @@ module.exports = class HypersignAuthService {
         }
     }
 
+    /**
+     * Deletes refresh token for that user
+     * @param { string } refreshToken 
+     */
     async logout(refreshToken){
         const payload = await this.verifyRefreshToken(refreshToken)
         // TODO: delete on logout
         await tokenStore.delete(payload.id) 
     }
 
+    /**
+     * Verifies JWT accessToken
+     * @param { string } authToken 
+     * @returns payload
+     */
     async authorize(authToken) {
         return await jwt.verify(authToken, this.options.jwtSecret)
     }
     
+    /**
+     * Geneartes verifiable credential JWT and sends email
+     * @param { object } user 
+     * @param { boolean } isThridPartyAuth 
+     * @returns null
+     */
     async register(user, isThridPartyAuth = false) {
         if(!this.mailService) throw new Error("Mail configuration is not defined");
         
@@ -252,6 +264,8 @@ module.exports = class HypersignAuthService {
             QRType: 'ISSUE_CRED',
             url: link
         });
+
+        // TODO:  need to remove this hardcoded url
         const deepLinkUrl = encodeURI('https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:deeplink?url=' + JSONdata);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
         
@@ -260,19 +274,17 @@ module.exports = class HypersignAuthService {
         return null;
     }
 
+    /**
+     * Verifies VC JWT and Geneartes verifiable credential
+     * @param { string } token 
+     * @param { string } userDid 
+     * @returns verifiable credential
+     */
     async getCredential(token, userDid) {
         const data = await jwt.verify(token, this.options.jwtSecret)
         data.did = userDid;
         const verifiableCredential = await this.generateCredential(data);
         return verifiableCredential
     }
-
-    getFormatedMessage(op, data) {
-        return JSON.stringify({
-            op,
-            data
-        })
-    }
-
 
 }
