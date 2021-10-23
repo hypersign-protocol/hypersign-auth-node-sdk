@@ -1,6 +1,6 @@
 const WebSocket = require('websocket')
 const { clientStore, logger } = require('./config')
-const { getFormatedMessage } =  require('./utils');
+const { getFormatedMessage, checkSlash } =  require('./utils');
 
 
 
@@ -17,7 +17,7 @@ module.exports = class HSWebsocket {
     }
 
     getQRData(baseUrl, challenge){
-        baseUrl = this.checkSlash(baseUrl);
+        baseUrl = checkSlash(baseUrl);
         const JSONData = {
             QRType: 'REQUEST_CRED',
             serviceEndpoint:  baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
@@ -29,15 +29,6 @@ module.exports = class HSWebsocket {
         return JSONData;
     }
 
-    checkSlash(baseUrl) {
-        if(!baseUrl) throw new Error("baseUrl is null or empty");
-        baseUrl = baseUrl.trim();
-        if (!baseUrl.endsWith('/')) 
-            return baseUrl + '/';
-        else
-            return baseUrl;
-    }
-    
     initiate() {
         const wss = new WebSocket.server({
             httpServer: this.server, // Tieing websocket to HTTP server

@@ -3,6 +3,7 @@ const HypersignAuthService = require('./hsAuthService');
 const fs = require('fs');
 const path = require('path');
 const { clientStore, logger } = require('./config');
+const { extractToken, extractRfToken } =  require('./utils');
 
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
@@ -75,25 +76,12 @@ module.exports = class HypersignAuth {
 
     }
 
-
-    extractToken(req) {
-        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
-            return req.headers.authorization.split(' ')[1];
-        }
-        return null;
-    }
-    
-    extractRfToken(req) {
-        // TODO:  need to find out what is the proper way of sending a refresh token, 
-        // we are sending via "refresh_token": "Bearer <Refresh token>" header
-        if (req.headers.refreshtoken && req.headers.refreshtoken.split(' ')[0] === 'Bearer') {
-            return req.headers.refreshtoken.split(' ')[1];
-        }
-        return null;
-    }
-
-    // Public methods
-    //////////////////
+    /**
+     * Authenticate a user by verifying verifiable presentation sent by a user via wallet
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next 
+     */
     async authenticate(req, res, next) {
         try {
             req.body.hypersignCredential = await this.middlewareService.authenticate(req.body);
@@ -104,10 +92,16 @@ module.exports = class HypersignAuth {
         }
     }
 
-    // https://www.rfc-editor.org/rfc/rfc6749#section-6
+    /**
+     * Generates accessToken and refreshToken pair 
+     * Ref: https://www.rfc-editor.org/rfc/rfc6749#section-6
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next  
+     */
     async refresh(req, res, next){
         try {
-            const refreshToken = this.extractRfToken(req);
+            const refreshToken = extractRfToken(req);
             if(!refreshToken)throw new Error("Unauthorized: Refresh Token is not sent in header")
 
             req.body.hypersignCredential = await this.middlewareService.refresh(refreshToken); 
@@ -118,9 +112,15 @@ module.exports = class HypersignAuth {
         }
     }
 
+    /**
+     * Logs out a user
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next  
+     */
     async logout(req, res, next){
         try {
-            const refreshToken = this.extractRfToken(req);
+            const refreshToken = extractRfToken(req);
             if(!refreshToken)throw new Error("Unauthorized: Refresh Token is not sent in header")
 
             await this.middlewareService.logout(refreshToken); 
@@ -131,11 +131,16 @@ module.exports = class HypersignAuth {
             res.status(401).send(error.message)
         }
     }
-
     
+    /**
+     * Verifies accessToken and returns payload
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next  
+     */
     async authorize(req, res, next) {
         try {
-            const authToken = this.extractToken(req);
+            const authToken = extractToken(req);
             if (!authToken) throw new Error('Authorization token is not passed in the header')
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
@@ -146,6 +151,12 @@ module.exports = class HypersignAuth {
     }
 
 
+    /**
+     * Registers a new user and sends email
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next 
+     */
     async register(req, res, next) {
         try {
             if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')            
@@ -160,6 +171,12 @@ module.exports = class HypersignAuth {
         }
     }
 
+    /**
+     * Verifies the verifiable credential  JWT and issues auth verifiable credential
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next 
+     */
     async issueCredential(req, res, next) {
         try {
             const authToken = req.query.token;
@@ -174,6 +191,12 @@ module.exports = class HypersignAuth {
         }
     }
 
+    /**
+     * Generates QR data in case the service provider does not want to uee websocket and go with polling
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next  
+     */
     async newSession(req, res, next){
         try {
             const { baseUrl } = req.body;

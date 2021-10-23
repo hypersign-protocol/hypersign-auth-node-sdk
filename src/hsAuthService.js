@@ -39,7 +39,12 @@ module.exports = class HypersignAuthService {
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
     }
-
+    /**
+     * Verifies VP
+     * @param { Object } vpObj  // verifiable presentation
+     * @param { String } challenge  // challenge
+     * @returns boolean 
+     */
     async verifyPresentation(vpObj, challenge) {
         if (!vpObj) throw new Error('presentation is null')
         if (!challenge) throw new Error('challenge is null')
@@ -53,6 +58,11 @@ module.exports = class HypersignAuthService {
         return isVerified.verified;
     }
 
+    /**
+     * Generates verfiable credentials based on userdata 
+     * @param { Object } userData 
+     * @returns signed VC
+     */
     async generateCredential(userData) {
         const schemaUrl = this.options.hsNodeUrl + '/api/v1/schema/' + this.options.schemaId;
         const issuerKeys = this.options.keys;
@@ -76,6 +86,10 @@ module.exports = class HypersignAuthService {
         return signedCredential
     }
 
+    /**
+     * Generates verifiable presentation
+     * @returns signed VP
+     */
     async generatePresentation() {
         const issuerKeys = this.options.keys;
         const presentation = await this.hsSdkVC.generatePresentation(
@@ -87,6 +101,9 @@ module.exports = class HypersignAuthService {
         return signedPresentation
     }
 
+    /**
+     * Calls subscription api to check for plan and subscription
+     */
     async callSubscriptionAPIwithPresentation() {
         const data = await this.generatePresentation();
         const json = await fetchData(this.developerDashboardVerifyApi, {
@@ -107,6 +124,9 @@ module.exports = class HypersignAuthService {
         }
     }
 
+    /**
+     * Check for subscription
+     */
     async checkSubscription() {
         if (this.apiAuthToken == "") {
             logger.debug('HS-AUTH:: No API Authorization token found, authenticating using verifiable presentation');
@@ -129,6 +149,11 @@ module.exports = class HypersignAuthService {
         }
     }
 
+    /**
+     * Verifies refreshtoken JWT
+     * @param { String } refreshToken 
+     * @returns payload
+     */
     async verifyRefreshToken(refreshToken) {
         return await jwt.verify(refreshToken, this.options.rftokenSecret)
     }
