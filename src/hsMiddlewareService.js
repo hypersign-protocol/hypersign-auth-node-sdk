@@ -188,17 +188,7 @@ module.exports = class HSMiddlewareService {
         }
     }
 
-   async verifyRfToken(did,refresh_token){
-        return new Promise((resovle,reject)=>{
-            const did_tokens=did_store.get(did)
-            if(refresh_token===did_tokens.refresh_token){
-                resovle(true)
-            }else{
-                reject(new Error("Refresh Token Error: Token Not Found "))
-            }
-        })
-    }
-
+   
     async verifyRefreshToken(refreshToken) {
         return await jwt.verify(refreshToken, this.options.rftokenSecret)
     }
@@ -228,6 +218,12 @@ module.exports = class HSMiddlewareService {
             accessToken,
             refreshToken: refToken
         }
+    }
+
+    async logout(refreshToken){
+        const payload = await this.verifyRefreshToken(refreshToken)
+        // TODO: delete on logout
+        await tokenStore.delete(payload.id) 
     }
 
     async authorize(authToken) {

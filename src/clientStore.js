@@ -29,7 +29,7 @@ module.exports = class ClientStore extends EventEmitter{
 
 
     deleteClient(clientId) {
-        if (!this.clients[clientId]) throw new Error('Client does not exist')
+        //if (!this.clients[clientId]) throw new Error('Client does not exist')
         delete this.clients[clientId];
         return Object.keys(this.clients).length
     }

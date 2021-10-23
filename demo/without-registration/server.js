@@ -56,6 +56,14 @@ httpsLocalhost.getCerts().then(cert => {
             res.status(500).send(e.message)
         }
     })
+
+    app.post('/logout',hypersign.logout.bind(hypersign),(req,res,)=>{
+        try {    
+            res.status(200).send();
+        } catch (e) {
+            res.status(500).send(e.message)
+        }
+    })
     
     // Protected resource
     // Must pass hs_authorizationToken in x-auth-token header

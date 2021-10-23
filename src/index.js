@@ -117,6 +117,19 @@ module.exports = class HypersignAuth {
         }
     }
 
+    async logout(req, res, next){
+        try {
+            const refreshToken = this.extractRfToken(req);
+            if(!refreshToken)throw new Error("Unauthorized: Refresh Token is not sent in header")
+
+            await this.middlewareService.logout(refreshToken); 
+            // everthing is ok but there is no content
+            res.status(204).send();
+        } catch (error) {
+            res.status(401).send(error.message)
+        }
+    }
+
     
     async authorize(req, res, next) {
         try {
