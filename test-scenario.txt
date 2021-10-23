@@ -1,0 +1,23 @@
+
+Scenario 1
+1. A user when logins, he gets accessToken and refershToken
+2. A user should be able to access protected resource using accessToken
+3. Once the accessToken expires, a user genrates a new pair of tokens using refersh-token routes
+4. Old refershToken should not be valid -  blacklisting of refershToken
+
+Scenario 2
+1. A user when logins, he gets accessToken and refershToken
+2. A user should be able to access protected resource using accessToken
+3. Wait for refershToken to be expired
+4. Use the old refershToken in refersh-token route - user should not be able to generate new pair of token
+5. This will force user to login again
+
+
+Scenario 3
+1. A user when logins, he gets accessToken and refershToken (make the refershToken expiry time large like 1y)
+2. A user should be able to access protected resource using accessToken
+3. Trigger logout route 
+4. Use the old refershToken in refersh-token route - user should not be able to generate new pair of token
+5. This will force user to login again
+
+
