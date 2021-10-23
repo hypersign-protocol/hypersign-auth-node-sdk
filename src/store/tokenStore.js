@@ -1,3 +1,4 @@
+const { logger } = require('../config');
 module.exports = class TokenStore {
   constructor() {
     this.store = new Map();
@@ -30,7 +31,7 @@ module.exports = class TokenStore {
   // by default ref token never expires in 30s
   set(key, value, expiryTime = 30) {
     this.triggerDelete(this.toDateTime(expiryTime), () => {
-      console.log('Refresh token expired in  ' + expiryTime + ' seconds');
+      logger.debug('HS-AUTH:: Refresh token expired in  ' + expiryTime + ' seconds');
       this.delete(key);
     });
     return this.store.set(key, value);

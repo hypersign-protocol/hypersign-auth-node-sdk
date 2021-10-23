@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const hsSdk = require('hs-ssi-sdk');
 const regMailTemplate = require('./mail/mail.template');
 const MailService = require('./mail/mail.service');
-const { clientStore, tokenStore } = require('./config');
+const { clientStore, tokenStore, logger } = require('./config');
 const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
 
@@ -70,7 +70,7 @@ module.exports = class HypersignAuthService {
         delete userData['exp'];
         delete userData['did'];
 
-        console.log("HS-AUTH:: Credential is being generated...")
+        logger.debug("HS-AUTH:: Credential is being generated...")
         const credential = await this.hsSdkVC.generateCredential(schemaUrl, {
             subjectDid: did,
             issuerDid: issuerKeys.publicKey.id,
@@ -78,7 +78,7 @@ module.exports = class HypersignAuthService {
             attributesMap: userData,
         })
 
-        console.log("HS-AUTH:: Credential is being signed...")
+        logger.debug("HS-AUTH:: Credential is being signed...")
         const signedCredential = await this.hsSdkVC.signCredential(credential, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58)
         return signedCredential
     }
@@ -122,10 +122,10 @@ module.exports = class HypersignAuthService {
 
     async checkSubscription() {
         if (this.apiAuthToken == "") {
-            console.log('HS-AUTH:: No API Authorization token found, authenticating using verifiable presentation');
+            logger.debug('HS-AUTH:: No API Authorization token found, authenticating using verifiable presentation');
             await this.callSubscriptionAPIwithPresentation();
         } else {
-            console.log('HS-AUTH:: Found API Authorization token, trying to authorize');
+            logger.debug('HS-AUTH:: Found API Authorization token, trying to authorize');
             const developerPortalAPI = `${this.developerDashboardVerifyApi}?apiAuthToken=${this.apiAuthToken}`;
             const json = await this.fetchData(developerPortalAPI, {
                 method: 'POST',
@@ -134,7 +134,7 @@ module.exports = class HypersignAuthService {
             if (json.status == 200) {
                 this.isSubscriptionSuccess = true;
             } else if (json.status == 403) {
-                console.log('HS-AUTH:: API Authorization token has expired. Trying to authentication again using verifiable presentation');
+                logger.debug('HS-AUTH:: API Authorization token has expired. Trying to authentication again using verifiable presentation');
                 await this.callSubscriptionAPIwithPresentation();
             } else {
                 throw new Error(json.error);
@@ -154,7 +154,7 @@ module.exports = class HypersignAuthService {
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
 
-        console.log("HS-AUTH:: Presentation is being verified...")
+        logger.debug("HS-AUTH:: Presentation is being verified...")
 
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
 
@@ -174,7 +174,7 @@ module.exports = class HypersignAuthService {
         }
         
         clientStore.deleteClient(client.clientId);
-        console.log("HS-AUTH:: Finished.")
+        logger.debug("HS-AUTH:: Finished.")
         
         // TODO:: I think we need to not send the `user` property with this, 
         // we can simply send the accessTokena and refrehToken and then user can use authorize middleware to get user data

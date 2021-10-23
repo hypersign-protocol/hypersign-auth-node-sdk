@@ -40,7 +40,7 @@ httpsLocalhost.getCerts().then(cert => {
     app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
         try {
             const { user, accessToken, refreshToken } = req.body.hypersignCredential;
-            console.log(user)
+            // console.log(user)
                 // Do something with the user data.
             res.status(200).send({ status: 200, message: "Success", error: null });
         } catch (e) {
@@ -70,7 +70,7 @@ httpsLocalhost.getCerts().then(cert => {
     app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
         try {
             const user = req.body.userData;
-            console.log(user)
+            // console.log(user)
                 // Do whatever you want to do with it
             res.status(200).send({ status: 200, message: user, error: null });
         } catch (e) {

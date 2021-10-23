@@ -1,5 +1,5 @@
 const WebSocket = require('websocket')
-const { clientStore } = require('./config')
+const { clientStore, logger } = require('./config')
 const { getFormatedMessage } =  require('./utils');
 
 
@@ -46,7 +46,7 @@ module.exports = class HSWebsocket {
         const that = this;
         wss.on('request', (request) => {
             const connection = request.accept(null, request.origin)
-            console.log(`HS-AUTH:: Client connected`)
+            logger.debug(`HS-AUTH:: Client connected`)
             
             const clientId = clientStore.addClient(connection);
             clientStore.emit('startTimer', {clientId: clientId, time: this.socketConnectionTimeOut});
@@ -61,7 +61,7 @@ module.exports = class HSWebsocket {
                 if(conn == 4001 && clientId) {
                     clientStore.emit('deleteClient', { clientId });
                 }
-                console.log(`HS-AUTH:: Client disconnected`)                
+                logger.debug(`HS-AUTH:: Client disconnected`)                
             })
         })
     }

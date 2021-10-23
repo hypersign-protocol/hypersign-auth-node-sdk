@@ -2,7 +2,7 @@ const HSWebsocket = require('./hsWebsocket');
 const HypersignAuthService = require('./hsAuthService');
 const fs = require('fs');
 const path = require('path');
-const { clientStore } = require('./config');
+const { clientStore, logger } = require('./config');
 
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
@@ -47,7 +47,7 @@ module.exports = class HypersignAuth {
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(options.jwt, jwtDefault)
-            console.log('HS-AUTH:: JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
+            logger.debug('HS-AUTH:: JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
         } else {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
@@ -57,7 +57,7 @@ module.exports = class HypersignAuth {
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(options.rft, rftDefault)
-            console.log('HS-AUTH:: Refresh Token configuration not passed. Taking default configuration.. Secret = ' + rftDefault.secret + ' ExpiryTime = ' + rftDefault.expiryTime)
+            logger.debug('HS-AUTH:: Refresh Token configuration not passed. Taking default configuration.. Secret = ' + rftDefault.secret + ' ExpiryTime = ' + rftDefault.expiryTime)
         } else {
             Object.assign(options.rft, hsConfigJson.rft)
         }
@@ -99,7 +99,7 @@ module.exports = class HypersignAuth {
             req.body.hypersignCredential = await this.middlewareService.authenticate(req.body);
             next();
         } catch (e) {
-            console.log(e)
+            logger.error(e)
             res.status(401).send(e.message);
         }
     }
@@ -113,6 +113,7 @@ module.exports = class HypersignAuth {
             req.body.hypersignCredential = await this.middlewareService.refresh(refreshToken); 
             next()
         } catch (error) {
+            logger.error(error.message)
             res.status(401).send(error.message)
         }
     }
@@ -126,6 +127,7 @@ module.exports = class HypersignAuth {
             // everthing is ok but there is no content
             res.status(204).send();
         } catch (error) {
+            logger.error(error.message)
             res.status(401).send(error.message)
         }
     }
@@ -138,7 +140,7 @@ module.exports = class HypersignAuth {
             req.body.userData = await this.middlewareService.authorize(authToken);
             next();
         } catch (e) {
-            console.log(e)
+            logger.error(e)
             res.status(403).send(e.message);
         }
     }
@@ -153,7 +155,7 @@ module.exports = class HypersignAuth {
             }
             next();
         } catch (e) {
-            console.log(e)
+            logger.error(e)
             res.status(500).send(e.message);
         }
     }
@@ -167,7 +169,7 @@ module.exports = class HypersignAuth {
             req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
             next();
         } catch (e) {
-            console.log(e)
+            logger.error(e)
             res.status(500).send(e.message);
         }
     }
@@ -182,7 +184,7 @@ module.exports = class HypersignAuth {
             req.body.qrData = QRData;
             next();
         } catch (e) {
-            console.log(e)
+            logger.error(e)
             res.status(500).send(e.message);
         }
     }

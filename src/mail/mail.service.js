@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { logger } = require('../config');
 module.exports = class MailService {
   constructor({ host, port, user, pass, name }) {
     this.host = host;
@@ -19,7 +20,7 @@ module.exports = class MailService {
 
     this.transporter.verify((err, success) => {
       if (err) console.error(err);
-      console.log('HS-AUTH:: Your config is correct');
+      logger.debug('HS-AUTH:: Your config is correct');
     });
   }
 
