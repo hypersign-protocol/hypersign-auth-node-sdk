@@ -79,24 +79,24 @@ module.exports = class HypersignAuth {
     extractToken(req) {
         if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
             return req.headers.authorization.split(' ')[1];
-        } else if (req.query && req.query.token) {
-            return req.query.token;
         }
         return null;
     }
+    
     extractRfToken(req) {
-        if (req.headers.refresh_token && req.headers.refresh_token.split(' ')[0] === 'Bearer') {
-            return req.headers.refresh_token.split(' ')[1];
-        
+        // TODO:  need to find out what is the proper way of sending a refresh token, 
+        // we are sending via "refresh_token": "Bearer <Refresh token>" header
+        if (req.headers.refreshtoken && req.headers.refreshtoken.split(' ')[0] === 'Bearer') {
+            return req.headers.refreshtoken.split(' ')[1];
         }
         return null;
     }
+
     // Public methods
     //////////////////
-
     async authenticate(req, res, next) {
         try {
-            req.body.hsUserData = await this.middlewareService.authenticate(req.body);
+            req.body.hypersignCredential = await this.middlewareService.authenticate(req.body);
             next();
         } catch (e) {
             console.log(e)
@@ -104,58 +104,15 @@ module.exports = class HypersignAuth {
         }
     }
 
-    
-
-
-
-    async refresh(req ,res ,next){
+    // https://www.rfc-editor.org/rfc/rfc6749#section-6
+    async refresh(req, res, next){
         try {
-            
-            const jwt_token = this.extractToken(req);
-            if(!jwt_token)throw new Error("Authorization Token is not sent to header")
-            const refresh_token= this.extractRfToken(req);
-            if(!refresh_token)throw new Error("Refresh Token is not sent to header")
-            const auth_data_rft=await this.middlewareService.authorizeRf(refresh_token)         
-            try{
-             const auth_data_jwt=await this.middlewareService.authorize(jwt_token)
-                throw new Error("Jwt Not Expired, Cant Refresh")
-            } catch(e){
-              if(e.message==="jwt expired"){
-                try {
-                    let decode_jwt=await this.middlewareService.decode(jwt_token)
-                       const subject= await this.middlewareService.verifydid(decode_jwt.id) 
-                       
-                        //if did doesnot exists it will never come to this line will get rejected from pervious line 
-                        await this.middlewareService.verifyRfToken(decode_jwt.id,refresh_token);
-                        req.body.freshCredential=await this.middlewareService.issueCredentialFresh(subject); 
-                        //ToDo: delete refresh token and jwt and issue new ones
-                    } catch (error) {
-                        
-                            throw error;             
-                    }    
-                    
-              }else{
-                  throw e;
-              }
-           
-            }
-           // const rft_sign_status=this.middlewareService.authorizeRf(refresh_token)
+            const refreshToken = this.extractRfToken(req);
+            if(!refreshToken)throw new Error("Unauthorized: Refresh Token is not sent in header")
 
-            
-           // console.log(jwt_sign_status , rft_sign_status);
-           // expire detection 
-           // check integrity
-           // check local store
-           //chcek did
-           
-            //req.body.hsFreshTokens=await this.middlewareService.refresh(jwt_token,refresh_token);
-         
+            req.body.hypersignCredential = await this.middlewareService.refresh(refreshToken); 
             next()
-            // this.middlewareService.refresh(jwt_token,)
-
         } catch (error) {
-            console.log(error);
-            //throw error;
             res.status(401).send(error.message)
         }
     }

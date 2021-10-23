@@ -68,8 +68,9 @@
             } else if (messageData.op == 'end') {
                 ws.close();
                 $("#qrcode").hide();
-                const authorizationToken = messageData.data.tokens.auth_token
-               
+                console.log(messageData.data.tokens)
+                const authorizationToken = messageData.data.tokens.accessToken
+                
                 const url = `https://${window.location.host}/protected`
                 console.log(url)
                 fetch(url, {

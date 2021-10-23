@@ -6,9 +6,9 @@ const { clientStore } = require('./config');
 const fetch = require('node-fetch');
 const { v4: uuid4 } = require('uuid');
 
-const Did_store=require('./store')
+const TokenStore = require('./tokenStore')
 
-const did_store= new Did_store()
+const tokenStore= new TokenStore()
 module.exports = class HSMiddlewareService {
     constructor(options = {}, baseUrl) {
         this.options = {};
@@ -157,23 +157,34 @@ module.exports = class HSMiddlewareService {
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
 
         console.log("HS-AUTH:: Presentation is being verified...")
+
         if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('Could not verify the presentation')
-        const auth_token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
-        const refresh_token=await jwt.sign(subject,this.options.rftokenSecret,{ expiresIn: this.options.rftokenExpiryTime })
+
+        // TODO:  need to find out if we are missing any imp parameter in the options.
+        // what is the proper way to JWT sign 
+        const accessToken = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
+        const refreshToken= await jwt.sign(subject, this.options.rftokenSecret, { expiresIn: this.options.rftokenExpiryTime })
+
+        // TODO:  once we use redis , we can set the expiration time = this.options.rftokenExpiryTime also
+        // but for in-mem, let;s keep it simple
+        await tokenStore.set(subject.id, refreshToken, this.options.rftokenExpiryTime)
+
         const client = clientStore.getClient(challenge)
        
-        await did_store.set(subject.id,{auth_token,refresh_token,subject})
-        
         if(client.connection){
-            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens:{auth_token,refresh_token} }))
+            client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens: { accessToken, refreshToken }}))
         }
         
         clientStore.deleteClient(client.clientId);
         console.log("HS-AUTH:: Finished.")
+        
+        // TODO:: I think we need to not send the `user` property with this, 
+        // we can simply send the accessTokena and refrehToken and then user can use authorize middleware to get user data
+        // need to find out what is the proper way to doing it
         return {
             user: subject,
-            auth_token: auth_token,
-            refresh_token:refresh_token,
+            accessToken,
+            refreshToken,
         }
     }
 
@@ -188,62 +199,41 @@ module.exports = class HSMiddlewareService {
         })
     }
 
-
-    async issueCredentialFresh(subject){
-        return new Promise(async (resolve, reject)=>{
-            try{
-                const did_exists=await did_store.has(subject.id);
-                if(did_exists){ 
-                    await did_store.delete(subject.id);
-                    const auth_token = await jwt.sign(subject, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime });
-                    const refresh_token=await jwt.sign(subject,this.options.rftokenSecret,{ expiresIn: this.options.rftokenExpiryTime })
-                    await did_store.set(subject.id,{auth_token,refresh_token,subject})
-                    resolve( {
-                        user: subject,
-                        auth_token: auth_token,
-                        refresh_token:refresh_token,
-                    })
-                }else{
-                    reject(new Error("Error : did Does not Exist"))
-                }
-            }catch(e){
-                reject(e) 
-            }
-        })
+    async verifyRefreshToken(refreshToken) {
+        return await jwt.verify(refreshToken, this.options.rftokenSecret)
     }
+    
+    async refresh(refreshToken){
+        const payload = await this.verifyRefreshToken(refreshToken)
 
-
-    async verifydid(did){
+        // TODO: we need to check if this refresh token was present in the store.
+        const refTokenStored = await tokenStore.get(payload.id)
         
-        return new Promise(async(resove,reject)=>{
-            const status= did_store.has(did)
-            
-            if(status){
-                resove(await did_store.get(did).subject);
-            }else{
-                reject(new Error("User :did not Found"))
-            }
-        })
-    }
-    async refresh(jwt_token,refresh_token){
-      
-        return ({
-            authorizationToken:jwt_token,
-            refreshToken:refresh_token
-        })
+        if(refTokenStored != refreshToken){
+            throw new Error("Unauthorized: Invalid ref token or expired")
+        }
+
+        delete payload["exp"]
+        delete payload["iat"]
+        const accessToken = await jwt.sign(payload, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime })
+        const refToken = await jwt.sign(payload, this.options.rftokenSecret, { expiresIn: this.options.rftokenExpiryTime })
+
+        // TODO::  store the ref token using key value , user did as key
+        // Store the tokens in key val
+        // TODO:  once we use redis , we can set the expiration time = this.options.rftokenExpiryTime also
+        // but for in-mem, let;s keep it simple
+        await tokenStore.set(payload.id, refToken, this.options.rftokenExpiryTime) // the expirey time is in second
+        
+        return {
+            accessToken,
+            refreshToken: refToken
+        }
     }
 
-    async decode(token){
-        return await jwt.decode(token)
-    }
     async authorize(authToken) {
-        return await  jwt.verify(authToken, this.options.jwtSecret)
+        return await jwt.verify(authToken, this.options.jwtSecret)
     }
-    async authorizeRf(refreshToken) {
-        return await  jwt.verify(refreshToken, this.options.rftokenSecret)
-    }
-
-
+    
     async register(user, isThridPartyAuth = false) {
         if(!this.mailService) throw new Error("Mail configuration is not defined");
         
