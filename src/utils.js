@@ -4,3 +4,13 @@ export function getFormatedMessage(op, data) {
         data
     })
 }
+
+export function responseMessageFormat(success, message, data = {} ){
+    return { 
+        hs: {
+            success,
+            message,
+            data: JSON.stringify(data)
+        }
+    }
+}  
