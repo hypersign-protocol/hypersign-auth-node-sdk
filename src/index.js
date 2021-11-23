@@ -3,6 +3,7 @@ const HSMiddlewareService = require('./hsMiddlewareService');
 const fs = require('fs');
 const path = require('path');
 const { clientStore } = require('./config');
+const { responseMessageFormat } = require('./utils');
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
 
@@ -21,7 +22,7 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
-
+        if(!hsConfigJson.appCredential.credentialSubject.serviceEp) throw new Error("Service Enpoint is not present in hypersign.json");
 
         const options = {
             keys: {},
@@ -48,9 +49,9 @@ module.exports = class HypersignAuth {
             Object.assign(options.jwt, hsConfigJson.jwt)
         }
 
-
+        this.serviceEndPoint = hsConfigJson.appCredential.credentialSubject.serviceEp;
         this.ws = new HSWebsocket(server,
-            hsConfigJson.appCredential.credentialSubject.serviceEp,
+            this.serviceEndPoint,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId,
@@ -58,7 +59,7 @@ module.exports = class HypersignAuth {
         this.ws.initiate();
 
         options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
-        this.middlewareService = new HSMiddlewareService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
+        this.middlewareService = new HSMiddlewareService(options, this.serviceEndPoint);
 
     }
 
@@ -85,7 +86,7 @@ module.exports = class HypersignAuth {
         }
     }
 
-    
+
     async authorize(req, res, next) {
         try {
             const authToken = this.extractToken(req);
@@ -126,18 +127,37 @@ module.exports = class HypersignAuth {
         }
     }
 
-    async newSession(req, res, next){
+    async challenge(req, res, next){
         try {
-            const { baseUrl } = req.body;
-            if(!baseUrl) throw new Error("BaseUrl is not passed");
+            if(!this.serviceEndPoint) {
+                return res.status(400).send(responseMessageFormat(false, "Service Enpoint is not present in hypersign.json. Contact admin."))
+            } 
             const clientId = clientStore.addClient(null);
             clientStore.emit('startTimer', {clientId: clientId, time: 60000});
-            const QRData = this.ws.getQRData(baseUrl, clientId);
-            req.body.qrData = QRData;
+            const QRData = this.ws.getQRData(this.serviceEndPoint, clientId);
+            Object.assign(req.body, {...responseMessageFormat(true, "QRData", QRData)})
             next();
         } catch (e) {
-            console.log(e)
-            res.status(500).send(e.message);
+            res.status(400).send(responseMessageFormat(false, e.message));
+        }
+    }
+
+    async poll(req, res, next){
+        try {
+            let challenge;
+            if(req.query && req.query.challenge){
+                challenge = req.query.challenge;
+            } else if(req.body && req.body.challenge){
+                challenge = req.body.challenge;
+            }
+            if(!challenge){
+                return res.status(400).send(responseMessageFormat(false, "Challenge is not passed in the request body or query parameter"))
+            }
+            const authToken = await this.middlewareService.poll({ challenge });
+            Object.assign(req.body, {...responseMessageFormat(true, 'User is authenticated', { authToken })})
+            next();
+        } catch (e) {
+            res.status(401).send(responseMessageFormat(false, e.message));
         }
     }
 

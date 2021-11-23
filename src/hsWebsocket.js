@@ -23,7 +23,8 @@ module.exports = class HSWebsocket {
             serviceEndpoint:  baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
             schemaId: this.schemaId,
             appDid: this.appDid,
-            appName: this.appName
+            appName: this.appName,
+            challenge
         }
 
         return JSONData;

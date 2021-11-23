@@ -160,9 +160,12 @@ module.exports = class HSMiddlewareService {
 
         if(client.connection){
             client.connection.sendUTF(this.getFormatedMessage('end', { message: 'User is validated. Go to home page.', token }))
+            client = clientStore.updateClient(challenge, client.connection, true, token);
+        } else {
+            client = clientStore.updateClient(challenge, null, true, authToken);
         }
         
-        clientStore.deleteClient(client.clientId);
+        // clientStore.deleteClient(client.clientId);
         console.log("HS-AUTH:: Finished.")
         return {
             hs_userdata: subject,
@@ -212,6 +215,21 @@ module.exports = class HSMiddlewareService {
         data.did = userDid;
         const verifiableCredential = await this.generateCredential(data);
         return verifiableCredential
+    }
+
+    async poll({ challenge }){
+        if(!challenge){
+            throw new Error("Challenge must be passed");
+        }
+        let client = clientStore.getClient(challenge);
+        if(!client){
+            throw new Error("Invalid challenge");
+        }
+        const { isAuthenticated, authToken } = client;
+        if(isAuthenticated === false){
+            throw new Error("Unauthorized");
+        }
+        return authToken;
     }
 
     getFormatedMessage(op, data) {
