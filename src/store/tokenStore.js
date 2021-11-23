@@ -29,7 +29,7 @@ module.exports = class TokenStore {
 
   // by default ref token never expires in 30s
   set(key, value, expiryTime = 30) {
-    this.triggerDelete(this.toDateTime(expiryTime), () => {      
+    this.triggerDelete(this.toDateTime(expiryTime), () => {
       this.delete(key);
     });
     return this.store.set(key, value);

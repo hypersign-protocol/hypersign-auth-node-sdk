@@ -22,12 +22,10 @@ clientStore.on('startTimer', (args) => {
     try{
         const { clientId, time } = args;
         const { connection } = clientStore.getClient(clientId)
-        if(connection){
-            setTimeout(() => {
-                connection.sendUTF(getFormatedMessage('reload', { clientId }));
-                clientStore.emit('deleteClient', { clientId });
-            }, time)
-        }        
+        setTimeout(() => {
+            if(connection) connection.sendUTF(getFormatedMessage('reload', { clientId }));
+            clientStore.emit('deleteClient', { clientId });
+        }, time)        
     }catch(e){
         logger.error(e);
     }
