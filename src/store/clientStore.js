@@ -29,17 +29,16 @@ module.exports = class ClientStore extends EventEmitter {
     return this.clients[clientId];
   }
 
-  updateClient(clientId, connection, isAuthenticated, accessToken, refreshToken){
-    if (!this.clients[clientId]) throw new Error('Client does not exist')
+  updateClient(clientId, connection, isAuthenticated, accessToken, refreshToken) {
+    if (!this.clients[clientId]) throw new Error('Client does not exist');
     let updatedClient = this.clients[clientId];
-    if(connection) updatedClient["connection"] = connection;
-    if(isAuthenticated) updatedClient["isAuthenticated"] = isAuthenticated;
-    if(accessToken) updatedClient["accessToken"] = accessToken;
-    if(refreshToken) updatedClient["refreshToken"] = refreshToken;
+    if (connection) updatedClient['connection'] = connection;
+    if (isAuthenticated) updatedClient['isAuthenticated'] = isAuthenticated;
+    if (accessToken) updatedClient['accessToken'] = accessToken;
+    if (refreshToken) updatedClient['refreshToken'] = refreshToken;
     this.clients[clientId] = updatedClient;
     return updatedClient;
-}
-
+  }
 
   deleteClient(clientId) {
     //if (!this.clients[clientId]) throw new Error('Client does not exist')
