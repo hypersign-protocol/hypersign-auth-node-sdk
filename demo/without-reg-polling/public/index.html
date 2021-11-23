@@ -47,12 +47,14 @@
             const { challenge } = JSON.parse(data);
             formQRCodeHTML(data);
 
-            /// start the polling
-            poll(5000, challenge).then(x => {
-              console.log(x)
-            }).catch(e => {
-              console.log(e)
-            })
+            if(challenge){
+              /// start the polling
+              poll(5000, challenge).then(x => {
+                console.log(x)
+              }).catch(e => {
+                console.log(e)
+              })
+            }
           })
           .catch((e) => {
             console.log(e);

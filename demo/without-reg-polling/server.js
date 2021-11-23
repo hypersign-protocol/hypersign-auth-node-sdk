@@ -25,7 +25,7 @@ app.post(
   hypersign.authenticate.bind(hypersign),
   (req, res) => {
     try {
-      const user = req.body.hsUserData;
+      const {user} = req.body.hypersignCredential;
       console.log(user);
       // Do something with the user data.
       // The hsUserData contains userdata and authorizationToken
