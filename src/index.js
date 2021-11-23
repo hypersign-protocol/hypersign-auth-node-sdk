@@ -25,7 +25,7 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
-        if(!hsConfigJson.appCredential.credentialSubject.serviceEp) throw new Error("Service Enpoint is not present in hypersign.json");
+        if (!hsConfigJson.appCredential.credentialSubject.serviceEp) throw new Error("Service Enpoint is not present in hypersign.json");
 
         const options = {
             keys: {},
@@ -64,7 +64,7 @@ module.exports = class HypersignAuth {
         }
 
         this.ws = new HSWebsocket(server,
-            this.serviceEndPoint,
+            hsConfigJson.appCredential.credentialSubject.serviceEp,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId,
@@ -199,13 +199,10 @@ module.exports = class HypersignAuth {
      */
     async challenge(req, res, next){
         try {
-            if(!this.serviceEndPoint) {
-                return res.status(400).send(responseMessageFormat(false, "Service Enpoint is not present in hypersign.json. Contact admin."))
-            } 
             const clientId = clientStore.addClient(null);
             clientStore.emit('startTimer', {clientId: clientId, time: 60000});
-            const QRData = this.ws.getQRData(this.serviceEndPoint, clientId);
-            Object.assign(req.body, {...responseMessageFormat(true, "QRData", QRData)})
+            const QRData = this.ws.getQRData(clientId);
+            Object.assign(req.body, {...responseMessageFormat(true, "New session data", QRData)})
             next();
         } catch (e) {
             res.status(400).send(responseMessageFormat(false, e.message));
@@ -229,8 +226,8 @@ module.exports = class HypersignAuth {
             if(!challenge){
                 return res.status(400).send(responseMessageFormat(false, "Challenge is not passed in the request body or query parameter"))
             }
-            const authToken = await this.middlewareService.poll({ challenge });
-            Object.assign(req.body, {...responseMessageFormat(true, 'User is authenticated', { authToken })})
+            const tokens = await this.middlewareService.poll({ challenge });
+            Object.assign(req.body, {...responseMessageFormat(true, 'User is authenticated', { ...tokens })})
             next();
         } catch (e) {
             res.status(401).send(responseMessageFormat(false, e.message));

@@ -189,21 +189,20 @@ module.exports = class HypersignAuthService {
         // but for in-mem, let;s keep it simple
         await tokenStore.set(subject.id, refreshToken, this.options.rftokenExpiryTime)
 
-        const client = clientStore.getClient(challenge)
-       
+        let client = clientStore.getClient(challenge)
+        const tokens = { accessToken, refreshToken }
         if(client.connection){
-            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.', tokens: { accessToken, refreshToken } }))
+            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.', data: tokens }))
             client = clientStore.updateClient(challenge, client.connection, true, token);
         } else {
-            client = clientStore.updateClient(challenge, null, true, authToken);
+            client = clientStore.updateClient(challenge, null, true, tokens.accessToken, tokens.refreshToken);
         }
         
         // clientStore.deleteClient(client.clientId);
         console.log("HS-AUTH:: Finished.")
         return {
             user: subject,
-            accessToken,
-            refreshToken,
+            ...tokens
         }
     }
 
@@ -319,10 +318,10 @@ module.exports = class HypersignAuthService {
         if(!client){
             throw new Error("Invalid challenge");
         }
-        const { isAuthenticated, authToken } = client;
+        const { isAuthenticated, accessToken, refreshToken } = client;
         if(isAuthenticated === false){
             throw new Error("Unauthorized");
         }
-        return authToken;
+        return  { accessToken, refreshToken };
     }
 }

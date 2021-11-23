@@ -9,18 +9,17 @@ module.exports = class HSWebsocket {
         if (!server) throw new Error('Http server is required.')
         if (!baseUrl) throw new Error('Server baseUrl is required.')
         this.server = server;
-        this.baseUrl = baseUrl;
+        this.baseUrl = checkSlash(baseUrl);
         this.appDid = appDid;
         this.appName = appName;
         this.schemaId = schemaId;
         this.socketConnectionTimeOut = socketConnectionTimeOut;
     }
 
-    getQRData(baseUrl, challenge){
-        baseUrl = checkSlash(baseUrl);
+    getQRData(challenge){
         const JSONData = {
             QRType: 'REQUEST_CRED',
-            serviceEndpoint:  baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
+            serviceEndpoint:  this.baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
             schemaId: this.schemaId,
             appDid: this.appDid,
             appName: this.appName,
@@ -43,7 +42,7 @@ module.exports = class HSWebsocket {
             const clientId = clientStore.addClient(connection);
             clientStore.emit('startTimer', {clientId: clientId, time: this.socketConnectionTimeOut});
             
-            const JSONData = that.getQRData(this.baseUrl ,clientId);
+            const JSONData = that.getQRData(clientId);
 
             connection.sendUTF(getFormatedMessage('init', JSONData));
             connection.on('message', (m) => {
