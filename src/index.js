@@ -3,7 +3,7 @@ const HypersignAuthService = require('./hsAuthService');
 const fs = require('fs');
 const path = require('path');
 const { clientStore, logger } = require('./config');
-const { extractToken, extractRfToken } =  require('./utils');
+const { extractToken, extractRfToken, responseMessageFormat } =  require('./utils');
 
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
@@ -25,7 +25,7 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
-
+        if(!hsConfigJson.appCredential.credentialSubject.serviceEp) throw new Error("Service Enpoint is not present in hypersign.json");
 
         const options = {
             keys: {},
@@ -64,7 +64,7 @@ module.exports = class HypersignAuth {
         }
 
         this.ws = new HSWebsocket(server,
-            hsConfigJson.appCredential.credentialSubject.serviceEp,
+            this.serviceEndPoint,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId,
@@ -192,23 +192,48 @@ module.exports = class HypersignAuth {
     }
 
     /**
-     * Generates QR data in case the service provider does not want to uee websocket and go with polling
+     * Generates QR data (with challenge) in case the service provider does not want to uee websocket and go with polling
      * @param { Request } req 
      * @param { Response } res 
      * @param { Next } next  
      */
-    async newSession(req, res, next){
+    async challenge(req, res, next){
         try {
-            const { baseUrl } = req.body;
-            if(!baseUrl) throw new Error("BaseUrl is not passed");
+            if(!this.serviceEndPoint) {
+                return res.status(400).send(responseMessageFormat(false, "Service Enpoint is not present in hypersign.json. Contact admin."))
+            } 
             const clientId = clientStore.addClient(null);
             clientStore.emit('startTimer', {clientId: clientId, time: 60000});
-            const QRData = this.ws.getQRData(baseUrl, clientId);
-            req.body.qrData = QRData;
+            const QRData = this.ws.getQRData(this.serviceEndPoint, clientId);
+            Object.assign(req.body, {...responseMessageFormat(true, "QRData", QRData)})
             next();
         } catch (e) {
-            logger.error(e)
-            res.status(500).send(e.message);
+            res.status(400).send(responseMessageFormat(false, e.message));
+        }
+    }
+
+    /**
+     * Call this to check if a user has authenticated or not via wallet
+     * @param { Request } req 
+     * @param { Response } res 
+     * @param { Next } next  
+     */
+    async poll(req, res, next){
+        try {
+            let challenge;
+            if(req.query && req.query.challenge){
+                challenge = req.query.challenge;
+            } else if(req.body && req.body.challenge){
+                challenge = req.body.challenge;
+            }
+            if(!challenge){
+                return res.status(400).send(responseMessageFormat(false, "Challenge is not passed in the request body or query parameter"))
+            }
+            const authToken = await this.middlewareService.poll({ challenge });
+            Object.assign(req.body, {...responseMessageFormat(true, 'User is authenticated', { authToken })})
+            next();
+        } catch (e) {
+            res.status(401).send(responseMessageFormat(false, e.message));
         }
     }
 

@@ -45,3 +45,14 @@ export function extractRfToken(req) {
     }
     return null;
 }
+
+
+export function responseMessageFormat(success, message, data = {} ){
+    return { 
+        hs: {
+            success,
+            message,
+            data: JSON.stringify(data)
+        }
+    }
+} 

@@ -192,15 +192,14 @@ module.exports = class HypersignAuthService {
         const client = clientStore.getClient(challenge)
        
         if(client.connection){
-            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.',tokens: { accessToken, refreshToken }}))
+            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.', tokens: { accessToken, refreshToken } }))
+            client = clientStore.updateClient(challenge, client.connection, true, token);
+        } else {
+            client = clientStore.updateClient(challenge, null, true, authToken);
         }
         
-        clientStore.deleteClient(client.clientId);
-        logger.debug("HS-AUTH:: Finished.")
-        
-        // TODO:: I think we need to not send the `user` property with this, 
-        // we can simply send the accessTokena and refrehToken and then user can use authorize middleware to get user data
-        // need to find out what is the proper way to doing it
+        // clientStore.deleteClient(client.clientId);
+        console.log("HS-AUTH:: Finished.")
         return {
             user: subject,
             accessToken,
@@ -312,4 +311,18 @@ module.exports = class HypersignAuthService {
         return verifiableCredential
     }
 
+    async poll({ challenge }){
+        if(!challenge){
+            throw new Error("Challenge must be passed");
+        }
+        let client = clientStore.getClient(challenge);
+        if(!client){
+            throw new Error("Invalid challenge");
+        }
+        const { isAuthenticated, authToken } = client;
+        if(isAuthenticated === false){
+            throw new Error("Unauthorized");
+        }
+        return authToken;
+    }
 }
