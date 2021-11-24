@@ -25,7 +25,7 @@ app.post(
   hypersign.authenticate.bind(hypersign),
   (req, res) => {
     try {
-      const {user} = req.body.hypersignCredential;
+      const { user, accessToken, refreshToken } = req.body.hypersign.data;
       console.log(user);
       // Do something with the user data.
       // The hsUserData contains userdata and authorizationToken
@@ -48,7 +48,7 @@ app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
 // Protected resource
 app.post("/protected", hypersign.authorize.bind(hypersign), (req, res) => {
   try {
-    const user = req.body.userData;
+    const user = req.body.hypersign.data;
     console.log(user);
     // Do whatever you want to do with it
     res.status(200).send({ status: 200, message: user, error: null });

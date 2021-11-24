@@ -42,8 +42,8 @@
           .then((res) => res.json())
           .then((json) => {
             console.log(json)
-            const { hs } = json; 
-            const { data } = hs
+            const { hypersign } = json; 
+            const { data } = hypersign
             const { challenge } = JSON.parse(data);
             formQRCodeHTML(data);
 
@@ -71,9 +71,9 @@
           fetch(url)
             .then((res) => res.json())
             .then((json) => {
-              const { hs } = json; 
-              console.log(hs)
-              const { success } = hs;
+              const { hypersign } = json; 
+              console.log(hypersign)
+              const { success } = hypersign;
               if(success && success === true){
                 clearInterval(ticker);
               }
@@ -111,12 +111,12 @@
         } else if (messageData.op == "end") {
           ws.close();
           $("#qrcode").hide();
-          const authorizationToken = messageData.data.token;
+          const { accessToken, refreshToken } = messageData.data.hypersign.data
           const url = `https://${window.location.host}/protected`;
           console.log(url);
           fetch(url, {
             headers: {
-              Authorization: "Bearer " + authorizationToken,
+              Authorization: "Bearer " + accessToken,
             },
             method: "POST",
           })

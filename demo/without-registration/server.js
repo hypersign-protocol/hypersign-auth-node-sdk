@@ -39,7 +39,7 @@ httpsLocalhost.getCerts().then(cert => {
     // Implement /auth API: 
     app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
         try {
-            const { user, accessToken, refreshToken } = req.body.hypersignCredential;
+            const { user, accessToken, refreshToken } = req.body.hypersign.data;
             // console.log(user)
                 // Do something with the user data.
             res.status(200).send({ status: 200, message: "Success", error: null });
@@ -50,8 +50,8 @@ httpsLocalhost.getCerts().then(cert => {
     
     app.post('/refresh-token',hypersign.refresh.bind(hypersign),(req,res,)=>{
         try {    
-            const { accessToken, refreshToken } = req.body.hypersignCredential
-            res.status(200).send({ status: 200, message: req.body.hypersignCredential, error: null });
+            const { accessToken, refreshToken } = req.body.hypersign.data;
+            res.status(200).send({ status: 200, message: req.body.hypersign, error: null });
         } catch (e) {
             res.status(500).send(e.message)
         }
@@ -69,7 +69,7 @@ httpsLocalhost.getCerts().then(cert => {
     // Must pass hs_authorizationToken in x-auth-token header
     app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
         try {
-            const user = req.body.userData;
+            const user = req.body.hypersign.data;
             // console.log(user)
                 // Do whatever you want to do with it
             res.status(200).send({ status: 200, message: user, error: null });
