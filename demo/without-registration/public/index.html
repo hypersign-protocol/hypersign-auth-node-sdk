@@ -68,12 +68,14 @@
             } else if (messageData.op == 'end') {
                 ws.close();
                 $("#qrcode").hide();
-                const authorizationToken = messageData.data.token
+                console.log(messageData.data.hypersign.data)
+                const { accessToken, refreshToken } = messageData.data.hypersign.data
+                
                 const url = `https://${window.location.host}/protected`
                 console.log(url)
                 fetch(url, {
                         headers: {
-                            'Authorization': 'Bearer ' + authorizationToken
+                            'Authorization': 'Bearer ' + accessToken
                         },
                         method: "POST"
                     }).then(res => res.json())

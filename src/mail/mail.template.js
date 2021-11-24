@@ -1,5 +1,4 @@
-const template =
-    `
+const template = `
 <html>
 
 <head>
@@ -82,5 +81,5 @@ const template =
 </body>
 
 </html>
-`
-module.exports = template
+`;
+module.exports = template;

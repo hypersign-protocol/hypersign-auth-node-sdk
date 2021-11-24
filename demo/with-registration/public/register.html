@@ -26,10 +26,10 @@
 <script>
     async function register() {
         $('.loader').show();
-        let data = {};
+        let data = { user: {}};
         $("form :input").each(function(index) {
             let input = $(this);
-            if (input.attr('type') == 'text') data[input.attr('name')] = input.val();
+            if (input.attr('type') == 'text') data["user"][input.attr('name')] = input.val();
         });
         console.log(data)
         $.post(

@@ -1,13 +1,14 @@
 {
     "name": "hypersign-auth-js-sdk",
-    "version": "2.0.8",
+    "version": "3.0.0",
     "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
     "main": "dist/hypersign-auth-js-sdk.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "webpack -p",
-        "build:dev": "webpack --mode=development",
-        "prepare": "npm run build"
+        "build": "npm run prettier && webpack -p",
+        "build:dev": "npm run prettier && webpack --mode=development",
+        "prepare": "npm run prettier && npm run build",
+        "prettier": "prettier --config .prettierrc.json --write src/**/*.js"
     },
     "keywords": [
         "hypersign",
@@ -26,6 +27,7 @@
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",
+        "simple-node-logger": "^21.8.12",
         "uuid": "^8.3.2",
         "websocket": "^1.0.33"
     },
@@ -43,6 +45,7 @@
         "babel-plugin-ramda": "^2.0.0",
         "webpack": "^4.36.1",
         "webpack-bundle-analyzer": "^3.6.1",
-        "webpack-cli": "3.3.8"
+        "webpack-cli": "3.3.8",
+        "prettier": "^2.4.1"
     }
 }

@@ -31,7 +31,7 @@ app.get('/register', function(req, res) {
 // Implement /auth API: 
 app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
     try {
-        const user = req.body.hsUserData;
+        const { user } = req.body.hypersign.data;
         console.log(user)
             // Do something with the user data.
             // The hsUserData contains userdata and authorizationToken
@@ -73,7 +73,7 @@ app.get('/hs/api/v2/credential', hypersign.issueCredential.bind(hypersign), (req
 // Must pass hs_authorizationToken in x-auth-token header
 app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
     try {
-        const user = req.body.userData;
+        const user = req.body.hypersign.data;
         console.log(user)
             // Do whatever you want to do with it
         res.status(200).send({ status: 200, message: user, error: null });

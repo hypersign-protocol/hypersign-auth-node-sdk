@@ -119,3 +119,48 @@ ws.onmessage = function({data }) {
 Get the complete implemetation demo [here](demo/README.md). You can also get detials about the Hypersign protocol from Product hunt or from our [website](https://hypersign.id)
 
 
+## sdk
+
+### authenticate
+
+```
+hypersign.authenticate.bind(server)
+```
+
+### refresh
+
+```
+hypersign.refresh.bind(server)
+```
+
+### logout
+
+```
+hypersign.logout.bind(server)
+```
+
+### register
+
+```
+hypersign.register.bind(server)
+```
+
+### issueCredential
+
+```
+hypersign.issueCredential.bind(server)
+```
+
+### challenge
+
+```
+hypersign.challenge.bind(server)
+```
+
+### poll
+
+```
+hypersign.poll.bind(server)
+```
+
+

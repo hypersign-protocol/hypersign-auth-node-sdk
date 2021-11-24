@@ -27,7 +27,7 @@ httpsLocalhost.getCerts().then(cert => {
     app.use(bodyParser.json());
     app.use(cors());
     app.use(cookieParser());
-    
+    app.use(express.static("public"))
     const hypersign = new HypersignAuth(server);
     
     // Unprotected resource, may be to show login page
@@ -39,23 +39,38 @@ httpsLocalhost.getCerts().then(cert => {
     // Implement /auth API: 
     app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
         try {
-            const user = req.body.hsUserData;
-            console.log(user)
+            const { user, accessToken, refreshToken } = req.body.hypersign.data;
+            // console.log(user)
                 // Do something with the user data.
-                // The hsUserData contains userdata and authorizationToken
             res.status(200).send({ status: 200, message: "Success", error: null });
         } catch (e) {
             res.status(500).send({ status: 500, message: null, error: e.message });
         }
     })
     
+    app.post('/refresh-token',hypersign.refresh.bind(hypersign),(req,res,)=>{
+        try {    
+            const { accessToken, refreshToken } = req.body.hypersign.data;
+            res.status(200).send({ status: 200, message: req.body.hypersign, error: null });
+        } catch (e) {
+            res.status(500).send(e.message)
+        }
+    })
+
+    app.post('/logout',hypersign.logout.bind(hypersign),(req,res,)=>{
+        try {    
+            res.status(200).send();
+        } catch (e) {
+            res.status(500).send(e.message)
+        }
+    })
     
     // Protected resource
     // Must pass hs_authorizationToken in x-auth-token header
     app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
         try {
-            const user = req.body.userData;
-            console.log(user)
+            const user = req.body.hypersign.data;
+            // console.log(user)
                 // Do whatever you want to do with it
             res.status(200).send({ status: 200, message: user, error: null });
         } catch (e) {
