@@ -1,6 +1,6 @@
 {
     "name": "hypersign-auth-js-sdk",
-    "version": "2.0.8",
+    "version": "3.0.0",
     "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
     "main": "dist/hypersign-auth-js-sdk.js",
     "scripts": {
