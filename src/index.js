@@ -20,12 +20,20 @@ module.exports = class HypersignAuth {
         const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
         
         const hsConfigJson = JSON.parse(hypersignConfig);
-        
+
+        // TODO: we can delete this later. this is to make backward compatibility
+        hsConfigJson.appCredential.credentialSubject.authResourcePath = 
+            !hsConfigJson.appCredential.credentialSubject.authResourcePath ? "hs/api/v2/auth" : hsConfigJson.appCredential.credentialSubject.authResourcePath;
+        hsConfigJson.appCredential.credentialSubject.baseUrl = 
+            !hsConfigJson.appCredential.credentialSubject.baseUrl ? hsConfigJson.appCredential.credentialSubject.serviceEp : hsConfigJson.appCredential.credentialSubject.baseUrl;
+
+
         if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
         if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
-        if (!hsConfigJson.appCredential.credentialSubject.serviceEp) throw new Error("Service Enpoint is not present in hypersign.json");
+        if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("BaseUrl is not present in hypersign.json");
+        if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("AuthResourcePath is not present in hypersign.json");
 
         const options = {
             keys: {},
@@ -64,15 +72,16 @@ module.exports = class HypersignAuth {
         }
 
         this.ws = new HSWebsocket(server,
-            hsConfigJson.appCredential.credentialSubject.serviceEp,
+            hsConfigJson.appCredential.credentialSubject.baseUrl,
             hsConfigJson.appCredential.credentialSubject.did,
             hsConfigJson.appCredential.credentialSubject.name,
             options.schemaId,
-            hsConfigJson.socketConnTimeOut);
+            hsConfigJson.socketConnTimeOut,
+            hsConfigJson.appCredential.credentialSubject.authResourcePath);
         this.ws.initiate();
 
         options["isSubcriptionEnabled"] = hsConfigJson["isSubcriptionEnabled"] != undefined ? hsConfigJson["isSubcriptionEnabled"] : true;
-        this.middlewareService = new HypersignAuthService(options, hsConfigJson.appCredential.credentialSubject.serviceEp);
+        this.middlewareService = new HypersignAuthService(options, hsConfigJson.appCredential.credentialSubject.baseUrl);
 
     }
 
@@ -84,11 +93,12 @@ module.exports = class HypersignAuth {
      */
     async authenticate(req, res, next) {
         try {
-            req.body.hypersignCredential = await this.middlewareService.authenticate(req.body);
+            const data = await this.middlewareService.authenticate(req.body);
+            Object.assign(req.body, {...responseMessageFormat(true, "Authenticated successfully", { ...data })});
             next();
         } catch (e) {
             logger.error(e)
-            res.status(401).send(e.message);
+            res.status(401).send(responseMessageFormat(false, e.message));
         }
     }
 
@@ -104,11 +114,12 @@ module.exports = class HypersignAuth {
             const refreshToken = extractRfToken(req);
             if(!refreshToken)throw new Error("Unauthorized: Refresh Token is not sent in header")
 
-            req.body.hypersignCredential = await this.middlewareService.refresh(refreshToken); 
+            const newtokens = await this.middlewareService.refresh(refreshToken); 
+            Object.assign(req.body, {...responseMessageFormat(true, "New pair of tokens", { ...newtokens })});
             next()
         } catch (error) {
             logger.error(error.message)
-            res.status(401).send(error.message)
+            res.status(401).send(responseMessageFormat(false, e.message));
         }
     }
 
@@ -128,7 +139,7 @@ module.exports = class HypersignAuth {
             res.status(204).send();
         } catch (error) {
             logger.error(error.message)
-            res.status(401).send(error.message)
+            res.status(401).send(responseMessageFormat(false, e.message));
         }
     }
     
@@ -142,11 +153,12 @@ module.exports = class HypersignAuth {
         try {
             const authToken = extractToken(req);
             if (!authToken) throw new Error('Authorization token is not passed in the header')
-            req.body.userData = await this.middlewareService.authorize(authToken);
+            const userData = await this.middlewareService.authorize(authToken)
+            Object.assign(req.body, {...responseMessageFormat(true, "Authorized successfully", { ...userData })});
             next();
         } catch (e) {
             logger.error(e)
-            res.status(403).send(e.message);
+            res.status(403).send(responseMessageFormat(false, e.message));
         }
     }
 
@@ -162,12 +174,12 @@ module.exports = class HypersignAuth {
             if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')            
             const vc = await this.middlewareService.register(req.body["user"], req.body["isThridPartyAuth"]? req.body["isThridPartyAuth"]: false );
             if(vc){
-                req.body.verifiableCredential = vc;
+                Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", { ...vc })});
             }
             next();
         } catch (e) {
             logger.error(e)
-            res.status(500).send(e.message);
+            res.status(500).send(responseMessageFormat(false, e.message));
         }
     }
 
@@ -183,11 +195,12 @@ module.exports = class HypersignAuth {
             const userDid = req.query.did
             if (!authToken) throw new Error('Registration token is not passed in the in query')
             if (!userDid) throw new Error('User Did is not passed in the in query')
-            req.body.verifiableCredential = await this.middlewareService.getCredential(authToken, userDid);
+            const vc = await this.middlewareService.getCredential(authToken, userDid);
+            Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", { ...vc })});
             next();
         } catch (e) {
             logger.error(e)
-            res.status(500).send(e.message);
+            res.status(500).send(responseMessageFormat(false, e.message));
         }
     }
 

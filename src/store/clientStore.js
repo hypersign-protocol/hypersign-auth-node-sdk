@@ -25,12 +25,12 @@ module.exports = class ClientStore extends EventEmitter {
   }
 
   getClient(clientId) {
-    if (!this.clients[clientId]) throw new Error('Client does not exist');
+    if (!this.clients[clientId]) throw new Error('Invalid challenge');
     return this.clients[clientId];
   }
 
   updateClient(clientId, connection, isAuthenticated, accessToken, refreshToken) {
-    if (!this.clients[clientId]) throw new Error('Client does not exist');
+    if (!this.clients[clientId]) throw new Error('Invalid challenge');
     let updatedClient = this.clients[clientId];
     if (connection) updatedClient['connection'] = connection;
     if (isAuthenticated) updatedClient['isAuthenticated'] = isAuthenticated;

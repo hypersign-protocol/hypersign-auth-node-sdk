@@ -5,7 +5,7 @@ const { getFormatedMessage, checkSlash } =  require('./utils');
 
 
 module.exports = class HSWebsocket {
-    constructor(server, baseUrl, appDid, appName, schemaId, socketConnectionTimeOut = 60000) {
+    constructor(server, baseUrl, appDid, appName, schemaId, socketConnectionTimeOut = 60000, authResourcePath) {
         if (!server) throw new Error('Http server is required.')
         if (!baseUrl) throw new Error('Server baseUrl is required.')
         this.server = server;
@@ -14,12 +14,13 @@ module.exports = class HSWebsocket {
         this.appName = appName;
         this.schemaId = schemaId;
         this.socketConnectionTimeOut = socketConnectionTimeOut;
+        this.authResourcePath = authResourcePath.startsWith("/") ? authResourcePath.substring(1): authResourcePath ; 
     }
 
     getQRData(challenge){
         const JSONData = {
             QRType: 'REQUEST_CRED',
-            serviceEndpoint:  this.baseUrl + 'hs/api/v2/auth?challenge=' + challenge,
+            serviceEndpoint:  this.baseUrl + this.authResourcePath,
             schemaId: this.schemaId,
             appDid: this.appDid,
             appName: this.appName,

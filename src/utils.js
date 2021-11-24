@@ -49,10 +49,10 @@ export function extractRfToken(req) {
 
 export function responseMessageFormat(success, message, data = {} ){
     return { 
-        hs: {
+        hypersign: {
             success,
             message,
-            data: JSON.stringify(data)
+            data
         }
     }
 } 

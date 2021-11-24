@@ -29,15 +29,23 @@ app.post(
       console.log(user);
       // Do something with the user data.
       // The hsUserData contains userdata and authorizationToken
-      res.status(200).send({ status: 200, message: "Success", error: null });
+      res.status(200).send("Authenticated");
     } catch (e) {
-      res.status(500).send({ status: 500, message: null, error: e.message });
+      res.status(500).send();
     }
   }
 );
 
+
+app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
+  res.status(200).send(req.body);
+});
+
+app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
+  res.status(200).send(req.body);
+});
+
 // Protected resource
-// Must pass hs_authorizationToken in x-auth-token header
 app.post("/protected", hypersign.authorize.bind(hypersign), (req, res) => {
   try {
     const user = req.body.userData;
@@ -49,13 +57,6 @@ app.post("/protected", hypersign.authorize.bind(hypersign), (req, res) => {
   }
 });
 
-app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
-  res.status(200).send(req.body);
-});
-
-app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
-  res.status(200).send(req.body);
-});
 
 server.listen(port, () => {
   console.log(`${TIME()} The server is running on port : ${port}`);

@@ -4,7 +4,7 @@ const regMailTemplate = require('./mail/mail.template');
 const MailService = require('./mail/mail.service');
 const { clientStore, tokenStore, logger } = require('./config');
 const { v4: uuid4 } = require('uuid');
-const { sanetizeUrl, getFormatedMessage, fetchData } = require('./utils');
+const { sanetizeUrl, getFormatedMessage, fetchData, responseMessageFormat } = require('./utils');
 
 
 module.exports = class HypersignAuthService {
@@ -38,6 +38,10 @@ module.exports = class HypersignAuthService {
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
+
+        this.verifyResourcePath = this.options.appCredential.credentialSubject.verifyResourcePath != "" ? 
+                                ( this.options.appCredential.credentialSubject.verifyResourcePath.startsWith("/") ? this.options.appCredential.credentialSubject.verifyResourcePath : "/" + this.options.appCredential.verifyResourcePath) 
+                                : "/hs/api/v2/credential";
     }
     /**
      * Verifies VP
@@ -192,14 +196,13 @@ module.exports = class HypersignAuthService {
         let client = clientStore.getClient(challenge)
         const tokens = { accessToken, refreshToken }
         if(client.connection){
-            client.connection.sendUTF(getFormatedMessage('end', { message: 'User is validated. Go to home page.', data: tokens }))
-            client = clientStore.updateClient(challenge, client.connection, true, token);
+            client.connection.sendUTF(getFormatedMessage('end', responseMessageFormat(true, 'User is authenticated', tokens )))
+            client = clientStore.updateClient(challenge, client.connection, true, tokens.accessToken, tokens.refreshToken);
+            clientStore.deleteClient(client.clientId);
         } else {
             client = clientStore.updateClient(challenge, null, true, tokens.accessToken, tokens.refreshToken);
         }
-        
-        // clientStore.deleteClient(client.clientId);
-        console.log("HS-AUTH:: Finished.")
+        logger.debug("HS-AUTH:: Finished.")
         return {
             user: subject,
             ...tokens
@@ -265,7 +268,8 @@ module.exports = class HypersignAuthService {
      */
     async register(user, isThridPartyAuth = false) {
         if(!this.mailService) throw new Error("Mail configuration is not defined");
-        
+        if(!this.verifyResourcePath) throw new Error("VerifyResourcePath is not set in configuration file")
+
         if(!user)  throw new Error("User object is null or empty.")
 
         if(isThridPartyAuth){
@@ -278,7 +282,7 @@ module.exports = class HypersignAuthService {
         }
 
         const token = await jwt.sign(user, this.options.jwtSecret, { expiresIn: this.options.jwtExpiryTime })
-        let link = `${this.baseUrl}/hs/api/v2/credential?token=${token}`;
+        let link = `${this.baseUrl}${this.verifyResourcePath}?token=${token}`;
         let mailTemplate = regMailTemplate;
         mailTemplate = mailTemplate.replace(/@@APPNAME@@/g, this.options.mail.name);
         mailTemplate = mailTemplate.replace('@@RECEIVERNAME@@', user.name);
@@ -289,7 +293,9 @@ module.exports = class HypersignAuthService {
         });
 
         // TODO:  need to remove this hardcoded url
-        const deepLinkUrl = encodeURI('https://ssi.hypermine.in/hsauth/deeplink.html?deeplink=hypersign:deeplink?url=' + JSONdata);
+        const authServerOrigin = (new URL(this.options.hsNodeUrl)).origin;
+        const authenticationServerEndPoint = `${authServerOrigin}/hsauth`
+        const deepLinkUrl = encodeURI(`${authenticationServerEndPoint}/deeplink.html?deeplink=hypersign:deeplink?url=${JSONdata}`);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
         
         if(!user.email) throw new Error("No email is passed. Email is required property");
@@ -322,6 +328,8 @@ module.exports = class HypersignAuthService {
         if(isAuthenticated === false){
             throw new Error("Unauthorized");
         }
+
+        clientStore.deleteClient(challenge);
         return  { accessToken, refreshToken };
     }
 }
