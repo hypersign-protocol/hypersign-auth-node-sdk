@@ -3,14 +3,14 @@
 The Hypersign SDK supports the few methods which can be used as middleware in your nodejs project. You can either implement hypersign using websocket (by default). Or you can use polling mechanism.  
 
 
-1. [hypersign.authenticate()](/hypersignauthenticate)
-2. [hypersign.authorize()](/hypersignauthorize)
-3. [hypersign.challenge()](/hypersignchallenge)
-4. [hypersign.poll()](/hypersignpoll)
-5. [hypersign.refresh()](/hypersignrefresh)
-6. [hypersign.logout()](/hypersignlogout)
-7. [hypersign.register()](/hypersignregister)
-8. [hypersign.issueCredential()](/hypersignissueCredential)
+1. [hypersign.authenticate()](/docs.md#hypersignauthenticate)
+2. [hypersign.authorize()](/docs.md#hypersignauthorize)
+3. [hypersign.challenge()](/docs.md#hypersignchallenge)
+4. [hypersign.poll()](/docs.md#hypersignpoll)
+5. [hypersign.refresh()](/docs.md#hypersignrefresh)
+6. [hypersign.logout()](/docs.md#hypersignlogout)
+7. [hypersign.register()](/docs.md#hypersignregister)
+8. [hypersign.issueCredential()](/docs.md#hypersignissueCredential)
 
 ---
 
