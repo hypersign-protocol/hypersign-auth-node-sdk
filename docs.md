@@ -1,5 +1,20 @@
 # Hypersign Auth Js Sdk
 
+The Hypersign SDK supports the few methods which can be used as middleware in your nodejs project. You can either implement hypersign using websocket (by default). Or you can use polling mechanism.  
+
+
+1. [hypersign.authenticate()](/hypersignauthenticate)
+2. [hypersign.authorize()](/hypersignauthorize)
+3. [hypersign.challenge()](/hypersignchallenge)
+4. [hypersign.poll()](/hypersignpoll)
+5. [hypersign.refresh()](/hypersignrefresh)
+6. [hypersign.logout()](/hypersignlogout)
+7. [hypersign.register()](/hypersignregister)
+8. [hypersign.issueCredential()](/hypersignissueCredential)
+
+---
+
+
 ### hypersign.authenticate()
 
 Authenticates a user by verifying verifiable presentation sent by a user via wallet
