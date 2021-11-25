@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const HypersignAuth = require("hypersign-auth-js-sdk");
 
-const port = 3003;
+const port = 4006;
 const app = express();
 const server = http.createServer(app);
 
@@ -19,7 +19,8 @@ app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname + "/public/index.html"));
 });
 
-// Implement /auth API:
+// Authenticates a user
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthenticate
 app.post(
   "/hs/api/v2/auth",
   hypersign.authenticate.bind(hypersign),
@@ -36,16 +37,20 @@ app.post(
   }
 );
 
-
+// New session
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignchallenge
 app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
   res.status(200).send(req.body);
 });
 
+// Polling if authentication finished
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignpoll
 app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
   res.status(200).send(req.body);
 });
 
-// Protected resource
+// Authorizes a user and gives access to resource
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthorize
 app.post("/protected", hypersign.authorize.bind(hypersign), (req, res) => {
   try {
     const user = req.body.hypersign.data;

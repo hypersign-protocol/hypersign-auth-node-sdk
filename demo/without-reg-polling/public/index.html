@@ -24,138 +24,86 @@
       initiatePoll();
     });
 
-    function formattedMessage(m) {
-      return JSON.stringify({
-        type: "client",
-        message: m,
-      });
-    }
-
-    function initiatePoll() {
+    async function initiatePoll() {
       try {
-        $("#qrcode").html("");
-        $("#profile").html("");
+        clearHTML();
         const url = `http://${window.location.host}/challenge`;
-        fetch(url, {
-          method: "POST",
+        const rs = await fetch(url, {
+          method: 'POST',
         })
-          .then((res) => res.json())
-          .then((json) => {
-            console.log(json)
-            const { hypersign } = json; 
-            const { data } = hypersign
-            const { challenge } = JSON.parse(data);
-            formQRCodeHTML(data);
+        const js = await rs.json()
+        const { hypersign } = js;
+        const { data } = hypersign;
+        const { challenge } = data;
+        
+        formQRCodeHTML(JSON.stringify(data));
 
-            if(challenge){
-              /// start the polling
-              poll(5000, challenge).then(x => {
-                console.log(x)
-              }).catch(e => {
-                console.log(e)
-              })
-            }
-          })
-          .catch((e) => {
-            console.log(e);
+        if (challenge) {
+          const POLLING_INTERVAL = 5000; // ms
+          /// start the polling
+          const x = await poll(POLLING_INTERVAL, challenge);
+
+          const { accessToken } = x;
+          const url = `http://${window.location.host}/protected`;
+          const resp = await fetch(url, {
+            headers: {
+              Authorization: 'Bearer ' + accessToken,
+            },
+            method: 'POST',
           });
+
+          const json = await resp.json();
+          if (json.status == 403) {
+            console.log('error 403');
+          } else {
+            clearHTML();
+            $('#profile').text(JSON.stringify(json.message));
+          }
+        }
+
       } catch (e) {
         console.log(e);
       }
     }
 
     function poll(interval, challenge) {
-      return new Promise(function(resolve, reject) {
-        const ticker = setInterval(function() {                 
+      return new Promise(function (resolve, reject) {
+        const ticker = setInterval(function () {
           const url = `http://${window.location.host}/poll?challenge=${challenge}`;
-          fetch(url)
+          return fetch(url)
             .then((res) => res.json())
             .then((json) => {
-              const { hypersign } = json; 
-              console.log(hypersign)
-              const { success } = hypersign;
-              if(success && success === true){
+              const { hypersign } = json;
+              const { success, data } = hypersign;
+              if (success && success === true) {
                 clearInterval(ticker);
-              }
-              resolve(json);
-            })
-            .catch((e) => {
-              console.log(e)
-              reject(e)
-            });
-        }, interval)
-      })
-    }
-  
-
-    function initiate() {
-      let clientId = Math.floor(Math.random(10) * 100);
-      window.WebSocket = window.WebSocket || window.MozWebSocket;
-      if (!window.WebSocket) {
-        alert("Sorry, but your browser doesn't support WebSocket.");
-        return;
-      }
-
-      let ws = new WebSocket(`ws://${window.location.host}`);
-      ws.onopen = function () {};
-
-      ws.onmessage = function ({ data }) {
-        let messageData = JSON.parse(data);
-        console.log(messageData);
-        $("#qrcode").html("");
-        $("#profile").html("");
-        if (messageData.op == "init") {
-          const qrData = JSON.stringify(messageData.data);
-
-          formQRCodeHTML(qrDataStr);
-        } else if (messageData.op == "end") {
-          ws.close();
-          $("#qrcode").hide();
-          const { accessToken, refreshToken } = messageData.data.hypersign.data
-          const url = `https://${window.location.host}/protected`;
-          console.log(url);
-          fetch(url, {
-            headers: {
-              Authorization: "Bearer " + accessToken,
-            },
-            method: "POST",
-          })
-            .then((res) => res.json())
-            .then((json) => {
-              if (json.status == 403) {
-                console.log("eroor 403");
-              } else {
-                console.log(json.message);
-                $("#profile").html(JSON.stringify(json.message));
+                resolve(data);
               }
             })
             .catch((e) => {
               console.log(e);
             });
-        } else if (messageData.op == "reload") {
-          console.log("Timeout for clientId: " + messageData.data.clientId);
-          $("#qrcode").html("<img src='/loader.gif' />");
-          ws.close(4001, messageData.data.clientId);
-          window.location.reload();
-        }
-      };
+        }, interval);
+      });
+    }
 
-      ws.onerror = function (error) {};
+    function clearHTML(){
+      $('#qrcode').html('');
+      $('#web').html('');
+      $('#profile').html('');
     }
 
     function formQRCodeHTML(qrDataStr) {
       // Display the QR code to use with mobile app
-      $("#qrcode").qrcode({
+      $('#qrcode').qrcode({
         width: 300,
         height: 300,
         text: qrDataStr,
       });
 
       // OR use web wallet
-      const weblink = encodeURI(
-        "https://hswallet-stage.netlify.app/deeplink?url=" + qrDataStr
-      );
-      $(".web").html(
+      const weblink = encodeURI('https://hswallet-stage.netlify.app/deeplink?url=' + qrDataStr);
+      $('.web').html(
         ` <button onclick="window.open('${weblink}', 'popUpWindow','height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">USE WEB WALLET</button>`
       );
     }
