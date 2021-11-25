@@ -19,16 +19,18 @@ app.use(cookieParser());
 
 const hypersign = new HypersignAuth(server);
 
-// Unprotected resource, may be to show login page
+// Render Login page
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
+// Render registration page
 app.get('/register', function(req, res) {
     res.sendFile(path.join(__dirname + '/public/register.html'));
 });
 
-// Implement /auth API: 
+// Implement authentication API
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthenticate
 app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
     try {
         const { user } = req.body.hypersign.data;
@@ -44,6 +46,7 @@ app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) =
 
 // Implement /register API: 
 // Analogous to register user but not yet activated
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignregister
 app.post('/hs/api/v2/register', hypersign.register.bind(hypersign), (req, res) => {
     try {
         console.log('Register success');
@@ -58,11 +61,14 @@ app.post('/hs/api/v2/register', hypersign.register.bind(hypersign), (req, res) =
 
 // Implement /credential API: 
 // Analogous to activate user
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignissuecredential
 app.get('/hs/api/v2/credential', hypersign.issueCredential.bind(hypersign), (req, res) => {
     try {
         console.log('Credential success');
-        // Now you can make this user active
-        res.status(200).send({ status: 200, message: req.body.verifiableCredential, error: null });
+        const { hypersign } = req.body;
+        const { data } = hypersign;
+        console.log(hypersign)
+        res.status(200).send({ ...data });
     } catch (e) {
         res.status(500).send({ status: 500, message: null, error: e.message });
     }
@@ -70,7 +76,8 @@ app.get('/hs/api/v2/credential', hypersign.issueCredential.bind(hypersign), (req
 
 
 // Protected resource
-// Must pass hs_authorizationToken in x-auth-token header
+// Must pass Authorization: Bearer <accessToken>  as header
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthorize
 app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
     try {
         const user = req.body.hypersign.data;

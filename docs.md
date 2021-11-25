@@ -178,3 +178,48 @@ hypersign: {
 ### hypersign.issueCredential()
 
 Verifies the verifiable credential  JWT and issues auth verifiable credential
+
+Request Query Param
+
+```js
+{
+    token,
+    did
+}
+```
+
+
+Returns
+
+
+```js
+{
+  success: true,
+  message: 'Verifiable Credential',
+  data: {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      [Object],
+      [Object],
+      [Object]
+    ],
+    id: 'vc_bd9762db-895c-4cfd-a000-da483ee662c5',
+    type: [ 'VerifiableCredential', 'Hypersign RP' ],
+    expirationDate: '2021-11-25T09:12:53.953Z',
+    issuanceDate: '2021-11-25T09:12:54.178Z',
+    issuer: 'did:hs:d86asdasd682-9a09-f68a51678cec',
+    credentialSubject: {
+      name: 'vishwas',
+      email: 'blablabla@gmail.comm',
+      id: 'did:hs:9f6a198123ASDADbb5cd69'
+    },
+    proof: {
+      type: 'Ed25519Signature2018',
+      created: '2021-11-25T09:12:55Z',
+      jws: 'eyJhbGciOiJFZERTQSIsImI2NCI6ZmsdadasdQiOlsiYjY0Il19..JjqDeUwQjH8b7SLasd232212RF5lge_W7RvkBGHxTi0G8SRTHPiBHAA',
+      proofPurpose: 'assertionMethod',
+      verificationMethod: 'did:hs:d86asdasd682-9a09-f68a51678cec#z6MkpBK9LoPUgoTUtnXfrgGmt6c9jaGQYoG2xWuF3xgjP2GD'
+    }
+  }
+}
+```
