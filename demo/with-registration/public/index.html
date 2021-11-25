@@ -14,6 +14,9 @@
         <div id="qrcode">
             <img src='loader.gif' />
         </div>
+        <p>OR</p>
+        <p class="web"></p>
+        
         <a href="/register">Register</a>
         <div id="profile"></div>
     </div>
@@ -56,6 +59,14 @@
                     "height": 300,
                     "text": JSON.stringify(messageData.data)
                 });
+
+
+                const weblink = encodeURI(
+                    "https://hswallet-stage.netlify.app/deeplink?url=" + JSON.stringify(messageData.data)
+                );
+                $(".web").html(
+                    ` <button onclick="window.open('${weblink}', 'popUpWindow','height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">USE WEB WALLET</button>`
+                );
             } else if (messageData.op == 'end') {
                 ws.close();
                 $("#qrcode").hide();
