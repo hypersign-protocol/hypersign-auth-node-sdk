@@ -62,7 +62,7 @@
 
 
                 const weblink = encodeURI(
-                    "http://localhost:4999/chrome/popup/popup#/deeplink?url=" + JSON.stringify(messageData.data)
+                    "https://hswallet-stage.netlify.app/deeplink?url=" + JSON.stringify(messageData.data)
                 );
                 $(".web").html(
                     ` <button onclick="window.open('${weblink}', 'popUpWindow','height=800,width=400,left=100,top=100,resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=no,directories=no, status=yes');">USE WEB WALLET</button>`
