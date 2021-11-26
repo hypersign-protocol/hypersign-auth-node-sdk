@@ -6,6 +6,17 @@
   <body>
     <h3>Time</h3>
     <h1 id="time"></h1>
+    <div id="hs-auth-btn"></div>
     <script type="module" src="index.js"></script>
   </body>
 </html>
+
+<script>
+  document.addEventListener('hs-success', function(e){
+    alert(JSON.stringify(e.detail));
+  })
+
+  document.addEventListener('hs-error', function(e){
+    console.log(e.detail);
+  })
+</script>
