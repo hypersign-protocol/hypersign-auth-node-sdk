@@ -171,8 +171,11 @@ module.exports = class HypersignAuth {
      */
     async register(req, res, next) {
         try {
-            if (!req.body) throw new Error('User data is not passed in the body: req.body.userData')            
-            const vc = await this.middlewareService.register(req.body["user"], req.body["isThridPartyAuth"]? req.body["isThridPartyAuth"]: false );
+            const { user, isThridPartyAuth } = req.body;
+            if (!user) {
+                return res.status(400).send(responseMessageFormat(false, 'user object is not passed in the body'));
+            } 
+            const vc = await this.middlewareService.register(user, isThridPartyAuth? isThridPartyAuth: false );
             if(vc){
                 Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", { ...vc })});
             }
@@ -193,8 +196,14 @@ module.exports = class HypersignAuth {
         try {
             const authToken = req.query.token;
             const userDid = req.query.did
-            if (!authToken) throw new Error('Registration token is not passed in the in query')
-            if (!userDid) throw new Error('User Did is not passed in the in query')
+            if (!authToken) {
+                return res.status(400).send(responseMessageFormat(false, 'token is not passed in the in query'));
+            } 
+
+            if (!userDid) {
+                return res.status(400).send(responseMessageFormat(false, 'did is not passed in the in query'));
+            } 
+            
             const vc = await this.middlewareService.getCredential(authToken, userDid);
             Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", { ...vc })});
             next();
