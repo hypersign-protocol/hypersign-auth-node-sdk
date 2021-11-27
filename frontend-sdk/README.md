@@ -1,9 +1,17 @@
 # Hypersign dAuth Javascript Frontend SDK
 
-## Step1: Create a DOM with id `hs-auth-btn`
+## Step1: Create a DOM with id `hs-auth-btn` or `hs-auth-qr`
+
+### For Hypersign Login Button
 
 ```html
 <div id="hs-auth-btn"></div>
+```
+
+### For QR code
+
+```html
+<canvas id="hs-auth-qr"></canvas>
 ```
 
 ## Step2: Add appropriate script
