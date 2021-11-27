@@ -8,10 +8,10 @@ const LISTENER_MODE_ENUM = {
   SOCKET: 'SOCKET',
 };
 
-// const ENV = {
-//     DEV: "DEV",
-//     PROD: "PROD"
-// }
+const ENV_ENUM = {
+  TEST: 'TEST',
+  MAIN: 'MAIN',
+};
 
 /**
  * Checks if browser support WebSocket
@@ -191,8 +191,48 @@ async function initiatePolling({
  * Starts the program
  * @returns void
  */
-function start(options) {
+function start() {
   try {
+    let options = {
+      LISTENER_MODE: document.currentScript.getAttribute('data-listener-mode')
+        ? document.currentScript.getAttribute('data-listener-mode')
+        : LISTENER_MODE_ENUM.SOCKET,
+      RP_SOCKET_URL: document.currentScript.getAttribute('data-rp-socket-url'),
+      RP_SERVER_BASEURL: document.currentScript.getAttribute('data-rp-server-base-url'),
+      RP_CHALLENGE_RESOURCE: document.currentScript.getAttribute('data-rp-challege-resource')
+        ? document.currentScript.getAttribute('data-rp-challege-resource')
+        : '/api/v1/auth/challenge',
+      RP_POLLING_RESOURCE: document.currentScript.getAttribute('data-rp-polling-resource')
+        ? document.currentScript.getAttribute('data-rp-polling-resource')
+        : '/api/v1/auth/poll',
+      LOGIN_BUTTON_TEXT: document.currentScript.getAttribute('data-login-button-text')
+        ? document.currentScript.getAttribute('data-login-button-text')
+        : 'LOGIN USING HYPERSIGN',
+      NETWORK_MODE: document.currentScript.getAttribute('data-network-mode')
+        ? document.currentScript.getAttribute('data-network-mode')
+        : ENV_ENUM.TEST,
+      POLLING_INTERVAL: document.currentScript.getAttribute('data-polling-interval')
+        ? parseInt(document.currentScript.getAttribute('data-polling-interval'))
+        : 5000,
+      HS_WALLET_BASEURL: '',
+    };
+
+    switch (options.NETWORK_MODE) {
+      case ENV_ENUM.TEST: {
+        options.HS_WALLET_BASEURL = 'https://hswallet-stage.netlify.app';
+        break;
+      }
+
+      case ENV_ENUM.MAIN: {
+        options.HS_WALLET_BASEURL = 'https://wallet.hypersign.id';
+        break;
+      }
+
+      default: {
+        throw new Error('HSAuth:: Invalid Network Mode');
+      }
+    }
+
     const { LISTENER_MODE } = options;
 
     const hsLoginBtnDOM = document.getElementById('hs-auth-btn');
@@ -212,7 +252,6 @@ function start(options) {
           throw new Error('HSAuth:: Relying Party Socket URL Must Be Passed for Websocket Mode');
         }
         const rpSocketParsedUrl = new URL(RP_SOCKET_URL);
-        console.log(rpSocketParsedUrl);
         initiateSocket({
           rpServerSocketURL: rpSocketParsedUrl.href,
           hsLoginBtnDOM,
@@ -225,25 +264,22 @@ function start(options) {
 
       case LISTENER_MODE_ENUM.POLLING: {
         let { RP_SERVER_BASEURL, POLLING_INTERVAL } = options;
+
         if (!RP_SERVER_BASEURL) {
           throw new Error('HSAuth:: Relying Party Base Url Must Be Passed For Polling Mode');
         }
 
         const rpBaseParsedUrl = new URL(RP_SERVER_BASEURL);
-        console.log(rpBaseParsedUrl);
-        if (!POLLING_INTERVAL) {
-          POLLING_INTERVAL = 5000;
-        }
 
         initiatePolling({
           rpBaseURL: rpBaseParsedUrl.href,
           hsLoginBtnDOM,
           hsLoginQRDOM,
-          hsloginBtnText: !options.LOGIN_BUTTON_TEXT ? 'HYPRESIGN' : options.LOGIN_BUTTON_TEXT,
+          hsloginBtnText: options.LOGIN_BUTTON_TEXT,
           hsWalletBaseURL: options.HS_WALLET_BASEURL,
           hsPollingInterval: POLLING_INTERVAL,
-          rpChallengeResource: !options.RP_CHALLENGE_RESOURCE ? 'api/v1/auth/challenge' : options.RP_CHALLENGE_RESOURCE,
-          rpPollResource: !options.RP_POLLING_RESOURCE ? 'api/v1/auth/poll' : options.RP_POLLING_RESOURCE,
+          rpChallengeResource: options.RP_CHALLENGE_RESOURCE,
+          rpPollResource: options.RP_POLLING_RESOURCE,
         });
         break;
       }
@@ -253,24 +289,8 @@ function start(options) {
       }
     }
   } catch (e) {
-    document.dispatchEvent(
-        new CustomEvent(HS_EVENTS_ENUM.ERROR, {
-          detail: e.message,
-          bubbles: true,
-        })
-    )
+    console.error(e.message);
   }
 }
 
-const options = {
-  LISTENER_MODE: LISTENER_MODE_ENUM.POLLING,
-  RP_SOCKET_URL: 'ws://localhost:4006',
-  RP_SERVER_BASEURL: 'http://localhost:4006',
-  RP_CHALLENGE_RESOURCE: '/challenge',
-  RP_POLLING_RESOURCE: '/poll',
-  LOGIN_BUTTON_TEXT: 'LOGIN USING WEB WALLET',
-  HS_WALLET_BASEURL: 'https://hswallet-stage.netlify.app',
-  POLLING_INTERVAL: 5000,
-};
-
-start(options);
+start();

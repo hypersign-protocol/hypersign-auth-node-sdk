@@ -4,10 +4,33 @@
     <link href="style.css" rel="stylesheet" />
   </head>
   <body>
-    <h3>Time</h3>
-    <h1 id="time"></h1>
+    <h3>Login</h3>
     <div id="hs-auth-btn"></div>
-    <script type="module" src="index.js"></script>
+    <!-- <script src="index.js" 
+      data-network-mode='TEST'
+      data-listener-mode='POLLING'
+      data-rp-server-base-url='http://localhost:4006'
+      data-rp-challege-resource='/challenge'
+      data-rp-polling-resource='/poll'
+      data-login-button-text='lOGIN wITH hYPERSIGN'
+      data-polling-interval='5000'
+      ></script> -->
+
+    <!-- <script src="index.js" 
+      data-network-mode='TEST'
+      data-listener-mode='SOCKET'
+      data-rp-socket-url='ws://localhost:4006'
+      data-login-button-text='lOGIN wITH hYPERSIGN'
+      ></script> -->
+
+    <script src="index.js" data-rp-socket-url="ws://localhost:4006"></script>
+
+    <!-- <script src="index.js" 
+        data-listener-mode='POLLING'
+        data-rp-server-base-url='http://localhost:4006'
+        data-rp-challege-resource='/challenge'
+        data-rp-polling-resource='/poll'
+      ></script> -->
   </body>
 </html>
 
@@ -17,6 +40,7 @@
   });
 
   document.addEventListener('hs-error', function (e) {
-    console.log(e.detail);
+    console.log('hs-error');
+    console.error(e);
   });
 </script>
