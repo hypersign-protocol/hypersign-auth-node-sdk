@@ -99,7 +99,7 @@ npm run dev
 
 Browse the login page [http://localhost:1234](http://localhost:1234)
 
-![img]('./LoginPage.png')
+![img](./LoginPage.png)
 
 
 
