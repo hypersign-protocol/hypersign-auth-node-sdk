@@ -54,3 +54,55 @@ Other optional paramaters:
   data-polling-interval="5000" // Polling interval. Default value 5000
 ></script>
 ```
+
+## Events
+
+### `hs-success`
+
+You can listen to `hs-success` event for getting `accessToken` and `refreshToken` once the user is successfully authenticated. Example:
+
+```js
+document.addEventListener('hs-success', function (e) {
+    alert(JSON.stringify(e.detail));
+  });
+```
+
+Output
+
+```js
+{
+    "accessToken": "<JWT Token>",
+    "refreshToken": "<JWT Token>"
+}
+```
+### `hs-error`
+
+You can listen to `hs-error` event for any other error.
+
+```js
+  document.addEventListener('hs-error', function (e) {
+    console.error(e.detail);
+  });
+```
+
+## Installation 
+
+```sh
+npm i 
+```
+
+## Run the project
+
+```sh
+npm run dev
+```
+
+Browse the login page [http://localhost:1234](http://localhost:1234)
+
+![img]('./LoginPage.png')
+
+
+
+
+
+
