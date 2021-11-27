@@ -1,67 +1,42 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="utf-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.qrcode@1.0.3/jquery.qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
     <script src="./hypersign.js"></script>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link rel="stylesheet" href="./hypersign.css">
     <title>Hypersign Login Demo</title>
-    <style>
-        .login{
-            padding: 10px;
-            border: 1px solid #80808040;
-            margin-top: 10%;
-            margin-right: 0;
-            width: 350px;
-            min-height: 400px;
-        }
-        .register{
-            padding: 10px;
-            border: 1px solid #80808040;
-            margin-top: 10%;
-            margin-right: 0;
-            width: 350px;
-            min-height: 400px;
-        }
-
-        .profile{
-            padding: 10px;
-            border: 1px solid #80808040;
-            margin-top: 10%;
-            margin-right: 0;
-            width: 350px;
-            min-height: 400px;
-            word-wrap: break-word;
-        }
-    </style>
 </head>
 
 <body>
-    <div class="box" align="center">
-        <div class="login">
+    <div class="" align="center">
+        <div class="box login">
             <h3>Login</h3>
-            <div id="qrcode">
-                <img src='loader.gif' />
-            </div>
+            <p>
+                <canvas id="hs-auth-qr"></canvas>
+            </p>
             <p style="font-size: small;">Scan the QR code</p>
             <p>OR</p>
-            <p class="web"></p>
+            <div id="hs-auth-btn"></div>
+
+            
             <button class="btn btn-link" onclick="reg()">Sign Up</button>
         </div>
-        <div class="register">
+        <div class="box register">
             <h2>Sign Up</h3>
             <form action="">
                 <input class="form-control" type="text" name="name" placeholder="Enter your name"><br>
                 <input class="form-control" type="text" name="email" placeholder="Enter your email"><br>
-                <!-- <input type="text" name="phoneNumber" placeholder="Enter your phoneNumber"><br> -->
+                <input class="form-control" type="text" name="phoneNumber" placeholder="Enter your phoneNumber"><br>
             </form>
             <button class="btn btn-primary" onclick="register()">Register</button>
             <button class="btn btn-link"><a href="/">Login</a></button>
         </div>
-        <div class="profile">
+        <div class="box profile">
             <h3>
                 Your Profile
             </h3>
@@ -71,3 +46,10 @@
     </div>
 </body>
 </html>
+
+<script
+                src="https://cdn.jsdelivr.net/gh/hypersign-protocol/hypersign-auth-js-sdk@1.0.2/build/hs-auth-js-sdk.js"
+                data-rp-socket-url="ws://localhost:4006"
+                crossorigin="anonymous"
+                >
+    </script>
