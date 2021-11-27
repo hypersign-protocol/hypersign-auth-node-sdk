@@ -55,7 +55,7 @@ Other optional paramaters:
 ></script>
 ```
 
-## Events
+## Step3: Listen to Events
 
 ### `hs-success`
 
