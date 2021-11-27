@@ -4,8 +4,13 @@
     <link href="style.css" rel="stylesheet" />
   </head>
   <body>
-    <div align="center">
-      <h3>Login</h3>
+    <div class="box">
+      <h2>Login</h2>
+      <p>
+        <canvas id="hs-auth-qr"></canvas>
+        <span>Scan the QR code </span>
+      </p>
+      <p>OR</p>
       <div id="hs-auth-btn"></div>
       <!-- <script src="index.js" 
       data-network-mode='TEST'
@@ -24,7 +29,7 @@
       data-login-button-text='lOGIN wITH hYPERSIGN'
       ></script> -->
 
-      <script src="index.js" data-rp-socket-url="ws://localhost:4006"></script>
+      <script type="module" src="index.js" data-rp-socket-url="ws://localhost:4006"></script>
 
       <!-- <script src="index.js" 
         data-listener-mode='POLLING'

@@ -1,3 +1,5 @@
+var QRCode = require('qrcode')
+
 const HS_EVENTS_ENUM = {
   ERROR: 'hs-error',
   SUCCESS: 'hs-success',
@@ -99,7 +101,10 @@ function formQRAndButtonHTML({ hsWalletBaseURL, hsLoginBtnDOM, hsLoginQRDOM, qrD
 
   // TODO: Display the QR code to use with mobile app
   if (hsLoginQRDOM) {
-    // display QR code
+    // display QR cod
+    QRCode.toCanvas(hsLoginQRDOM, qrDataStr, function (error) {
+        if (error) throw new Error(error)
+    })
   }
 }
 
