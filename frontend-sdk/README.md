@@ -16,6 +16,12 @@ You can use Hypersign dAuth in either of two modes.
 ### Using Websocket
 
 ```js
+<script src="index.js" data-rp-socket-url="ws://localhost:4006"></script>
+```
+
+Other optional paramaters: 
+
+```js
 <script
   src="index.js"
   data-network-mode="TEST" // Network mode TEST | MAIN. Default value 'MAIN'
@@ -26,6 +32,15 @@ You can use Hypersign dAuth in either of two modes.
 ```
 
 ### Using Polling
+
+```js
+<script src="index.js" 
+    data-listener-mode='POLLING'
+    data-rp-server-base-url='http://localhost:4006'
+>
+</script> 
+```
+Other optional paramaters: 
 
 ```js
 <script
