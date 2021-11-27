@@ -8,7 +8,7 @@
 <div id="hs-auth-btn"></div>
 ```
 
-### For QR code
+### For Hypersign QR code
 
 ```html
 <canvas id="hs-auth-qr"></canvas>
