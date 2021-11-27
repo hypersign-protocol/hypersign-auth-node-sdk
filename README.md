@@ -90,7 +90,25 @@ Make sure to pass send `accessToken` token as bearer authorization token in head
 
 ### Client Side
 
-For client side implementation kindly visit [`hypersign-auth-js-sdk`](https://github.com/hypersign-protocol/hypersign-auth-js-sdk) documentation.
+- Step1: Create a DOM with id hs-auth-btn
+    ```html
+        <div id="hs-auth-btn"></div>
+    ```
+- Step2: Add appropriate script
+    ```html
+        <script
+            src="https://cdn.jsdelivr.net/gh/hypersign-protocol/hypersign-auth-js-sdk@1.0.2/build/hs-auth-js-sdk.js"
+            data-rp-socket-url="ws://localhost:4006"
+        ></script>
+    ```
+- Step3: Listen to Events
+    ```js
+        document.addEventListener('hs-success', function (e) {
+        alert(JSON.stringify(e.detail));
+        });
+    ```
+
+For more detail on client side implementation kindly visit [`hypersign-auth-js-sdk`](https://github.com/hypersign-protocol/hypersign-auth-js-sdk) documentation.
 
 ## Methods 
 
