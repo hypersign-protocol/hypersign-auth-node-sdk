@@ -1,6 +1,6 @@
 # Hypersign dAuth Javascript Frontend SDK
 
-## Step1: Create a DOM with id `hs-auth-btn` or `hs-auth-qr`
+## Step1: Create a DOM with id `hs-auth-btn` or `hs-auth-qr` or both
 
 ### For Hypersign Login Button
 
