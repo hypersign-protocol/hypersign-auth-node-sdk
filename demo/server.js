@@ -1,21 +1,17 @@
 const http = require('http')
 const express = require('express')
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
-const HypersignAuth = require('hypersign-auth-js-sdk')
+const HypersignAuth = require('hypersign-auth-node-sdk')
 
 const port = 4006
 const app = express()
 const server = http.createServer(app)
 
 const TIME = () => new Date();
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
-app.use(cookieParser());
-
+app.use(express.static('public'));
 
 const hypersign = new HypersignAuth(server);
 
@@ -75,7 +71,7 @@ app.get('/hs/api/v2/credential', hypersign.issueCredential.bind(hypersign), (req
 })
 
 
-// Protected resource
+// Any resource which you want to protect
 // Must pass Authorization: Bearer <accessToken>  as header
 // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthorize
 app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
@@ -88,6 +84,18 @@ app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
         res.status(500).send(e.message)
     }
 })
+
+// New session
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignchallenge
+app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
+    res.status(200).send(req.body);
+  });
+  
+  // Polling if authentication finished
+  // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignpoll
+app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
+    res.status(200).send(req.body);
+});
 
 server.listen(port, () => {
     console.log(`${TIME()} The server is running on port : ${port}`)

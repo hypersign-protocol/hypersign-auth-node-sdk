@@ -1,8 +1,8 @@
 {
-    "name": "hypersign-auth-js-sdk",
-    "version": "3.0.0",
+    "name": "hypersign-auth-node-sdk",
+    "version": "4.0.0",
     "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
-    "main": "dist/hypersign-auth-js-sdk.js",
+    "main": "dist/hypersign-auth-node-sdk.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "npm run prettier && webpack -p",

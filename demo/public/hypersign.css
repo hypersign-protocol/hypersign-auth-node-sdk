@@ -1,0 +1,17 @@
+body{
+    background-color: aliceblue;
+}
+.box{
+    padding: 10px;
+    border: 1px solid #80808040;
+    margin-top: 10%;
+    margin-right: 0;
+    width: 350px;
+    min-height: 400px;
+    background-color: white;
+}
+
+.profile{
+    
+    word-wrap: break-word;
+}

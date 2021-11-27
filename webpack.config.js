@@ -51,5 +51,5 @@ function configure(filename, opts = {}) {
 }
 
 module.exports = [
-    configure('hypersign-auth-js-sdk.js', { target: 'node' }),
+    configure('hypersign-auth-node-sdk.js', { target: 'node' }),
 ]
