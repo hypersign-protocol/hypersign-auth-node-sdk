@@ -24,14 +24,15 @@ You can use Hypersign dAuth in either of two modes.
 ### Using Websocket
 
 ```js
-<script src="index.js" data-rp-socket-url="ws://localhost:4006"></script>
+<script type="module" src="https://raw.githubusercontent.com/hypersign-protocol/hypersign-auth-js-sdk/feature/frontendsdk/frontend-sdk/build/v1.0.0/index.js" data-rp-socket-url="ws://localhost:4006"></script>
 ```
 
 Other optional paramaters: 
 
 ```js
 <script
-  src="index.js"
+  type="module"
+  src="https://raw.githubusercontent.com/hypersign-protocol/hypersign-auth-js-sdk/feature/frontendsdk/frontend-sdk/build/v1.0.0/index.js"
   data-network-mode="TEST" // Network mode TEST | MAIN. Default value 'MAIN'
   data-listener-mode="SOCKET" // Listener mode SOCKET | POLLING. Default value 'SOCKET'
   data-rp-socket-url="ws://localhost:4006" // Relying party websocket URL
@@ -42,7 +43,7 @@ Other optional paramaters:
 ### Using Polling
 
 ```js
-<script src="index.js" 
+<script type="module" src="https://raw.githubusercontent.com/hypersign-protocol/hypersign-auth-js-sdk/feature/frontendsdk/frontend-sdk/build/v1.0.0/index.js" 
     data-listener-mode='POLLING'
     data-rp-server-base-url='http://localhost:4006'
 >
@@ -52,7 +53,8 @@ Other optional paramaters:
 
 ```js
 <script
-  src="index.js"
+  type="module"
+  src="https://raw.githubusercontent.com/hypersign-protocol/hypersign-auth-js-sdk/feature/frontendsdk/frontend-sdk/build/v1.0.0/index.js"
   data-network-mode="TEST" // Network mode TEST | MAIN. Default value 'MAIN'
   data-listener-mode="POLLING" // Listener mode SOCKET | POLLING. Default value 'SOCKET'
   data-rp-server-base-url="http://localhost:4006" // Relying party server base URL
