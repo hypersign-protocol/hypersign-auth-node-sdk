@@ -11,6 +11,6 @@
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.17.1",
-        "hypersign-auth-js-sdk": "file://../"
+        "hypersign-auth-node-sdk": "file://../"
     }
 }
