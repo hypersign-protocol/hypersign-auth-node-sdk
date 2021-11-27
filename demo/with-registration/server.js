@@ -85,6 +85,18 @@ app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
     }
 })
 
+// New session
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignchallenge
+app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
+    res.status(200).send(req.body);
+  });
+  
+  // Polling if authentication finished
+  // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignpoll
+  app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
+    res.status(200).send(req.body);
+  });
+
 server.listen(port, () => {
     console.log(`${TIME()} The server is running on port : ${port}`)
 })
