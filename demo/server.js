@@ -1,7 +1,6 @@
 const http = require('http')
 const express = require('express')
 const cors = require('cors');
-const path = require('path');
 const HypersignAuth = require('hypersign-auth-node-sdk')
 
 const port = 4006
@@ -11,19 +10,14 @@ const server = http.createServer(app)
 const TIME = () => new Date();
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 const hypersign = new HypersignAuth(server);
 
 // Render Login page
-app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/public/index.html'));
-});
-
-// Render registration page
-app.get('/register', function(req, res) {
-    res.sendFile(path.join(__dirname + '/public/register.html'));
-});
+app.get("/", (req, res) => {
+    res.sendFile("index.html");
+  });
 
 // Implement authentication API
 // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthenticate
