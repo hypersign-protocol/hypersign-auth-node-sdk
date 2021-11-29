@@ -40,8 +40,8 @@ hypersign: {
             email: "testEmail@gmail.com",
             id: "did:hs:12312SSSFSDFSDF"
         },
-        accessToken: "",
-        refreshToken: ""
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.07uWxP56eIoLjmr1Zs2Sp6BKt8puVAsUqaa2HMoywcE',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.UqpMkHjn2DzJjAiQnBQmh9EdKeBHlG11Obp7XvzG9Pg'
     }
 }
 ```
@@ -79,13 +79,19 @@ Generates QR data (with challenge) in case the service provider does not want to
 Returns
 
 ```js
-hypersign: {
+{
+  hypersign: {
     success: true,
-    message: "New session data",
+    message: 'New session data',
     data: {
-        accessToken: "",
-        refreshToken: ""  
+      QRType: 'REQUEST_CRED',
+      serviceEndpoint: 'http://localhost:4000/api/v1/auth/login',
+      schemaId: 'sch_444fb51f-282b-4fec-90c4-e7e6052a2b26',
+      appDid: 'did:hs:54194717-3b21-419a-bca0-9bd4a60bcf27',
+      appName: 'Demo Application',
+      challenge: '674c7592-580b-40f0-9225-e98dec7804b3'
     }
+  }
 }
 ```
 
@@ -103,13 +109,15 @@ Request query:
 Returns
 
 ```js
-hypersign: {
+{
+  hypersign: {
     success: true,
-    message: "User is authenticated",
+    message: 'User is authenticated',
     data: {
-        accessToken: "",
-        refreshToken: ""
+      accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.07uWxP56eIoLjmr1Zs2Sp6BKt8puVAsUqaa2HMoywcE',
+      refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.UqpMkHjn2DzJjAiQnBQmh9EdKeBHlG11Obp7XvzG9Pg'
     }
+  }
 }
 ```
 
@@ -132,8 +140,8 @@ hypersign: {
     success: true,
     message: "New pair of tokens",
     data: {
-        accessToken: "",
-        refreshToken: ""
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.07uWxP56eIoLjmr1Zs2Sp6BKt8puVAsUqaa2HMoywcE',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiUHJhdGFwIE1yaWRoYSIsImVtYWlsIjoicHJhdGFwbXJpZGhhQGdtYWlsLmNvbSIsImlkIjoiZGlkOmhzOjVlZTIwYzkzLWFkYmQtNGEwYy05ZTUxLWJmYjBiZWZhN2UyMSIsImlhdCI6MTYzODE2NzcyNywiZXhwIjoxNzI0NTY3NzI3fQ.UqpMkHjn2DzJjAiQnBQmh9EdKeBHlG11Obp7XvzG9Pg'
     }
 }
 ```
