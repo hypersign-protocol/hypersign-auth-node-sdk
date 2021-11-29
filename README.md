@@ -61,13 +61,9 @@ Expose `/hs/api/v2/auth` API and and use `hypersign.authenticate` middleware.
 ```js
 // Implement /hs/api/v2/auth API 
 app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) => {
-    try {
-        const { user } = req.body.hypersign.data;
-        // Do something with the user data.
-        res.status(200).send({ status: 200, message: "Success", error: null });
-    } catch (e) {
-        res.status(500).send({ status: 500, message: null, error: e.message });
-    }
+    const { user } = req.body.hypersign.data;
+    // Do something with the user data.
+    res.status(200).send({ status: 200, message: "Success", error: null });
 })
 ```
 
@@ -75,13 +71,9 @@ Now protect your resources using `hypersign.authorize` middlerware. Take a look 
 
 ```js
 app.get('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
-    try {
-        const user = req.body.hypersign.data;
-        // Do whatever you want to do with it
-        res.status(200).send("I am protected by secure Hypersign authentication");
-    } catch (e) {
-        res.status(500).send(e.message)
-    }
+    const user = req.body.hypersign.data;
+    // Do whatever you want to do with it
+    res.status(200).send("I am protected by secure Hypersign authentication");
 })
 ```
 Make sure to pass send `accessToken` token as bearer authorization token in header when making the protected resource call.
