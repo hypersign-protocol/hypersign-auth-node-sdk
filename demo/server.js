@@ -17,7 +17,7 @@ const hypersign = new HypersignAuth(server);
 // Render Login page
 app.get("/", (req, res) => {
     res.sendFile("index.html");
-  });
+});
 
 // Implement authentication API
 // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignauthenticate
@@ -33,7 +33,6 @@ app.post('/hs/api/v2/auth', hypersign.authenticate.bind(hypersign), (req, res) =
     }
 })
 
-
 // Implement /register API: 
 // Analogous to register user but not yet activated
 // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignregister
@@ -47,7 +46,6 @@ app.post('/hs/api/v2/register', hypersign.register.bind(hypersign), (req, res) =
         res.status(500).send({ status: 500, message: null, error: e.message });
     }
 })
-
 
 // Implement /credential API: 
 // Analogous to activate user
@@ -63,7 +61,6 @@ app.get('/hs/api/v2/credential', hypersign.issueCredential.bind(hypersign), (req
         res.status(500).send({ status: 500, message: null, error: e.message });
     }
 })
-
 
 // Any resource which you want to protect
 // Must pass Authorization: Bearer <accessToken>  as header
@@ -83,10 +80,10 @@ app.post('/protected', hypersign.authorize.bind(hypersign), (req, res) => {
 // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignchallenge
 app.post("/challenge", hypersign.challenge.bind(hypersign), (req, res) => {
     res.status(200).send(req.body);
-  });
+});
   
-  // Polling if authentication finished
-  // Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignpoll
+// Polling if authentication finished
+// Doc: https://github.com/hypersign-protocol/hypersign-auth-js-sdk/blob/master/docs.md#hypersignpoll
 app.get("/poll", hypersign.poll.bind(hypersign), (req, res) => {
     res.status(200).send(req.body);
 });
