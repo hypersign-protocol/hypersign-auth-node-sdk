@@ -8,9 +8,7 @@ Hypersign-auth-node-sdk is node js based SDK for backend to implement passwordle
 
 ## Watch the demo on Youtube
 
-> Note: this is old video - will update the new one soon!
-
-[![IMAGE ALT TEXT](http://i.imgur.com/FWVjPfu.png)](https://www.youtube.com/watch?v=pSCmCZfeQKo&feature=youtu.be "hypersign developer exp")  
+[![IMAGE ALT TEXT](http://i.imgur.com/FWVjPfu.png)](https://www.youtube.com/watch?v=1c0VMnWDhr8 "hypersign developer exp")  
 
 ## The protocol
 
