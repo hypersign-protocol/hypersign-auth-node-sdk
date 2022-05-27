@@ -1,7 +1,7 @@
 {
-    "name": "chat",
+    "name": "demo",
     "version": "1.0.0",
-    "description": "A simple chat app on websocket",
+    "description": "A demo to test Hypersign auth SDK",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,6 @@
     "license": "ISC",
     "dependencies": {
         "cors": "^2.8.5",
-        "express": "^4.17.1",
-        "hypersign-auth-node-sdk": "file://../"
+        "express": "^4.17.1"
     }
 }
