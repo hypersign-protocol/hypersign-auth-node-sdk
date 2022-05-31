@@ -27,7 +27,8 @@ module.exports = class HypersignAuth {
 
 
         if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
-        if (hsConfigJson.networkUrl == "") throw new Error('Network Url is not set');
+        if (hsConfigJson.networkUrl == "") throw new Error('Network RPC Url is not set');
+        if (hsConfigJson.networkRestUrl == "") throw new Error('Network REST Url is not set');
         if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
         if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("BaseUrl is not present in hypersign.json");
