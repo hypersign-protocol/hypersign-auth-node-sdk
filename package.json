@@ -23,13 +23,13 @@
     "author": "Vishwas Anand Bhushan",
     "license": "MIT",
     "dependencies": {
+        "hs-ssi-sdk": "git+https://github.com/hypersign-protocol/hid-ssi-js-sdk.git#ssi-integration",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",
         "simple-node-logger": "^21.8.12",
         "uuid": "^8.3.2",
-        "websocket": "^1.0.33",
-        "hs-ssi-sdk": "file:///home/hermit/hermit/code/hm/hs/hs-ssi-sdk"
+        "websocket": "^1.0.33"
     },
     "devDependencies": {
         "@babel/cli": "7.10.1",
