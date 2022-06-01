@@ -16,7 +16,7 @@ module.exports = class HypersignAuthService {
         this.options.jwtSecret = options && options.jwt.secret ? options.jwt.secret : 'secretKey';
         this.options.rftokenSecret = options && options.rft.secret ? options.rft.secret : '8e5507e12da789f3c3bd640711378201d658657999384061bb';
         this.options.hidNodeURL = options && options.networkUrl ? options.networkUrl : "http://localhost:26657"
-        this.options.hidNodeRestURL = options && options.networkRestUrl ? options.networkRestUrl : "http://localhost:1317"
+        this.options.hidNodeRestURL = options && options.hidNodeRestURL ? options.hidNodeRestURL : "http://localhost:1317"
         this.options.mail = options && options.mail ? options.mail : mail;
 
         if (!options.offlineSigner) {
