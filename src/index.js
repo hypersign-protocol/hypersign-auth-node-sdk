@@ -15,7 +15,7 @@ module.exports = class HypersignAuth {
         // Making it backward compatible
         const hsFilePath = path.join(__dirname, '../../../', HYPERSIGN_CONFIG_FILE);
         const hsFilePathDev = path.join(__dirname, '../', HYPERSIGN_CONFIG_FILE)
-        if (!fs.existsSync(hsFilePath) && !fs.existsSync(hsFilePathDev)) throw new Error(HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; filePath = ' + hsFilePath);
+        if (!fs.existsSync(hsFilePath) && !fs.existsSync(hsFilePathDev)) throw new Error('HS-AUTH-NODE-SDK:: Error: ' + HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; filePath = ' + hsFilePath);
 
         const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
 
@@ -26,13 +26,13 @@ module.exports = class HypersignAuth {
         hsConfigJson.appCredential.credentialSubject.baseUrl = !hsConfigJson.appCredential.credentialSubject.baseUrl ? hsConfigJson.appCredential.credentialSubject.serviceEp : hsConfigJson.appCredential.credentialSubject.baseUrl;
 
 
-        if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
-        if (hsConfigJson.networkUrl == "") throw new Error('Network RPC Url is not set');
-        if (hsConfigJson.networkRestUrl == "") throw new Error('Network REST Url is not set');
-        if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
-        if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
-        if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("BaseUrl is not present in hypersign.json");
-        if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("AuthResourcePath is not present in hypersign.json");
+        if (hsConfigJson.keys == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Cryptographic keys is not set');
+        if (hsConfigJson.networkUrl == "") throw new Error('HS-AUTH-NODE-SDK:: Error: Network RPC Url is not set');
+        if (hsConfigJson.networkRestUrl == "") throw new Error('HS-AUTH-NODE-SDK:: Error: Network REST Url is not set');
+        if (hsConfigJson.appCredential == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: App Credential is not set');
+        if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid credentialSubject');
+        if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("HS-AUTH-NODE-SDK:: Error: BaseUrl is not present in hypersign.json");
+        if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: AuthResourcePath is not present in hypersign.json");
 
         this.options = {
             keys: {},
@@ -118,7 +118,7 @@ module.exports = class HypersignAuth {
     async refresh(req, res, next) {
         try {
             const refreshToken = extractRfToken(req);
-            if (!refreshToken) throw new Error("Unauthorized: Refresh Token is not sent in header")
+            if (!refreshToken) throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Refresh Token is not sent in header")
 
             const newtokens = await this.middlewareService.refresh(refreshToken);
             Object.assign(req.body, {...responseMessageFormat(true, "New pair of tokens", {...newtokens }) });
@@ -138,7 +138,7 @@ module.exports = class HypersignAuth {
     async logout(req, res, next) {
         try {
             const refreshToken = extractRfToken(req);
-            if (!refreshToken) throw new Error("Unauthorized: Refresh Token is not sent in header")
+            if (!refreshToken) throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Refresh Token is not sent in header")
 
             await this.middlewareService.logout(refreshToken);
             // everthing is ok but there is no content
@@ -158,7 +158,7 @@ module.exports = class HypersignAuth {
     async authorize(req, res, next) {
         try {
             const authToken = extractToken(req);
-            if (!authToken) throw new Error('Authorization token is not passed in the header')
+            if (!authToken) throw new Error('HS-AUTH-NODE-SDK:: Error: Authorization token is not passed in the header')
             const userData = await this.middlewareService.authorize(authToken)
             Object.assign(req.body, {...responseMessageFormat(true, "Authorized successfully", {...userData }) });
             next();
