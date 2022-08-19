@@ -28,6 +28,11 @@ app.use(express.static("public"));
 
 
 let hypersign;
+
+const walletOptions = {
+    hidNodeRPCUrl: 'https://jagrat.hypersign.id/node1/rpc/',
+    hidNodeRestUrl: 'https://jagrat.hypersign.id/node1/rest/',
+};
 const hidWalletInstance = new HIDWallet(walletOptions);
 hidWalletInstance.generateWallet({ mnemonic }).then(async() => {
         hypersign = new HypersignAuth(server, hidWalletInstance.offlineSigner)
