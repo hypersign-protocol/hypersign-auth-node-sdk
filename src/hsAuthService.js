@@ -40,15 +40,12 @@ module.exports = class HypersignAuthService {
 
 
         this.options.appCredential = options.appCredential;
-        this.developerDashboardVerifyApi = `${ sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
-
-        // this.mailService = this.options.mail && this.options.mail.host != "" ? new MailService({...this.options.mail }) : null;
-
-
+        this.developerDashboardVerifyApi = `${sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
+        this.mailService = this.options.mail && this.options.mail.host != "" ? new MailService({ ...this.options.mail }) : null;
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
-        console.log(this.options.appCredential.credentialSubject.verifyResourcePath);
+
         this.verifyResourcePath = this.options.appCredential.credentialSubject.verifyResourcePath != "" ?
             (this.options.appCredential.credentialSubject.verifyResourcePath.startsWith("/") ? this.options.appCredential.credentialSubject.verifyResourcePath : "/" + this.options.appCredential.verifyResourcePath) :
             "/hs/api/v2/credential";
@@ -276,7 +273,7 @@ module.exports = class HypersignAuthService {
      */
     async logout(refreshToken) {
         const payload = await this.verifyRefreshToken(refreshToken)
-            // TODO: delete on logout
+        // TODO: delete on logout
         await tokenStore.delete(payload.id)
     }
 
