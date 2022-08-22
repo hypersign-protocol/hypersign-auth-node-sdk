@@ -48,7 +48,7 @@ module.exports = class HypersignAuthService {
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
-
+        console.log(this.options.appCredential.credentialSubject.verifyResourcePath);
         this.verifyResourcePath = this.options.appCredential.credentialSubject.verifyResourcePath != "" ?
             (this.options.appCredential.credentialSubject.verifyResourcePath.startsWith("/") ? this.options.appCredential.credentialSubject.verifyResourcePath : "/" + this.options.appCredential.verifyResourcePath) :
             "/hs/api/v2/credential";
