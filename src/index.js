@@ -192,7 +192,7 @@ module.exports = class HypersignAuth {
             if (!user) {
                 return res.status(400).send(responseMessageFormat(false, 'user object is not passed in the body'));
             }
-            const vc = await this.middlewareService.register(user, isThridPartyAuth ? isThridPartyAuth : false);
+            const vc = await this.middlewareService.register(user, isThridPartyAuth ? isThridPartyAuth : false, expirationDate);
             if (vc) {
                 Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", {...vc }) });
             }
