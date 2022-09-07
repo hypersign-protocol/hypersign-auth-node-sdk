@@ -1,3 +1,5 @@
+> **NOTE:** PLEASE DO NOT USE THIS PACKAGE IN PRODUCTION!
+
 # Hypersign Decentralised Authentication (Hypersign dAuth) Node SDK
 
 Hypersign is identity and access management infrastructure that ensures your employess and customers are really who they say they are. By combining biometric with the blockchain, it offers passwordless authentication, authorization, verification and intergrates in minutes.

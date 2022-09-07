@@ -1,6 +1,6 @@
 {
     "name": "hypersign-auth-node-sdk",
-    "version": "5.0.0",
+    "version": "6.0.0",
     "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
     "main": "dist/hypersign-auth-node-sdk.js",
     "scripts": {
@@ -23,7 +23,7 @@
     "author": "Vishwas Anand Bhushan",
     "license": "MIT",
     "dependencies": {
-        "hs-ssi-sdk": "^6.0.0",
+        "hs-ssi-sdk": "^6.1.0",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",

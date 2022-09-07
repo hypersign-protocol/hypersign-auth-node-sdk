@@ -11,6 +11,7 @@ module.exports = class HypersignAuthService {
 
     constructor(options = {}, baseUrl) {
         this.options = {};
+        this.options.namespace = options && options.namespace ? options.namespace : '';
         this.options.jwtExpiryTime = options && options.jwt.expiryTime ? options.jwt.expiryTime : 240000;
         this.options.rftokenExpiryTime = options && options.rft.expiryTime ? options.rft.expiryTime : 1000;
         this.options.jwtSecret = options && options.jwt.secret ? options.jwt.secret : 'secretKey';
@@ -56,7 +57,7 @@ module.exports = class HypersignAuthService {
 
 
     async init() {
-        const hsSdk = new HypersignSsiSDK(this.options.offlineSigner, this.options.hidNodeURL, this.options.hidNodeRestURL);
+        const hsSdk = new HypersignSsiSDK(this.options.offlineSigner, this.options.hidNodeURL, this.options.hidNodeRestURL, this.options.namespace);
         await hsSdk.init();
         this.hsSdkVC = hsSdk.vc;
         this.hsSDKVP = hsSdk.vp;
@@ -88,7 +89,7 @@ module.exports = class HypersignAuthService {
      * @param { Object } userData 
      * @returns signed VC
      */
-    async generateCredential(userData) {
+    async generateCredential(userData, expirationDate) {
         // const schemaUrl = this.options.hidNodeURL + '/api/v1/schema/' + this.options.schemaId;
         const schemaId = this.options.schemaId;
         const issuerKeys = this.options.keys;
@@ -105,7 +106,7 @@ module.exports = class HypersignAuthService {
             schemaId,
             subjectDid: did,
             issuerDid: issuerKeys.publicKey.id,
-            expirationDate: new Date().toISOString(),
+            expirationDate,
             fields: userData
         }
         const credential = await this.hsSdkVC.getCredential(options)
@@ -115,7 +116,7 @@ module.exports = class HypersignAuthService {
             issuerDid: issuerKeys.publicKey.id,
             privateKey: issuerKeys.privateKeyBase58
         }
-        const signedCredential = await this.hsSdkVC.signCredential(signOptions)
+        const signedCredential = await this.hsSdkVC.issueCredential(signOptions)
         return signedCredential
     }
 
@@ -295,7 +296,7 @@ module.exports = class HypersignAuthService {
      * @param { boolean } isThridPartyAuth 
      * @returns null
      */
-    async register(user, isThridPartyAuth = false) {
+    async register(user, isThridPartyAuth = false, expirationDate) {
         if (!this.mailService) throw new Error("HS-AUTH-NODE-SDK:: Error: Mail configuration is not defined");
         if (!this.verifyResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: VerifyResourcePath is not set in configuration file")
 
@@ -306,7 +307,7 @@ module.exports = class HypersignAuthService {
 
             if (!did) throw new Error("HS-AUTH-NODE-SDK:: Error: Did must be passed with thirdparty auth request");
 
-            const verifiableCredential = await this.generateCredential(user);
+            const verifiableCredential = await this.generateCredential(user, expirationDate);
             return verifiableCredential;
         }
 

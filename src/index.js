@@ -3,7 +3,7 @@ const HypersignAuthService = require('./hsAuthService');
 const fs = require('fs');
 const path = require('path');
 const { clientStore, logger } = require('./config');
-const { extractToken, extractRfToken, responseMessageFormat } = require('./utils');
+const { extractToken, extractRfToken, responseMessageFormat, isDate } = require('./utils');
 
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
@@ -33,6 +33,9 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid credentialSubject');
         if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("HS-AUTH-NODE-SDK:: Error: BaseUrl is not present in hypersign.json");
         if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: AuthResourcePath is not present in hypersign.json");
+        if(!hsConfigJson.namespace) {
+            logger.debug('HS-AUTH::DID namespace is not passed. Continuing with mainnet')
+        }
 
         this.options = {
             keys: {},
@@ -40,7 +43,8 @@ module.exports = class HypersignAuth {
             jwt: {},
             rft: {},
             appCredential: {},
-            offlineSigner
+            offlineSigner,
+            namespace:"",
         };
         Object.assign(this.options.mail, hsConfigJson.mail);
         Object.assign(this.options.keys, hsConfigJson.keys);
@@ -48,6 +52,7 @@ module.exports = class HypersignAuth {
 
         this.options.networkUrl = hsConfigJson.networkUrl;
         this.options.hidNodeRestURL = hsConfigJson.networkRestUrl;
+        this.options.namespace = hsConfigJson.namespace;
 
         this.options.schemaId = hsConfigJson.appCredential.credentialSubject.schemaId;
         this.options.developerDashboardUrl = hsConfigJson.developerDashboardUrl ? hsConfigJson.developerDashboardUrl : 'https://ssi.hypermine.in/developer/';
@@ -177,7 +182,13 @@ module.exports = class HypersignAuth {
      */
     async register(req, res, next) {
         try {
-            const { user, isThridPartyAuth } = req.body;
+            const { user, isThridPartyAuth, expirationDate } = req.body;
+            if(!expirationDate){
+                return res.status(400).send(responseMessageFormat(false, 'Creadential expirationDate must be passed'));
+            }
+            if(!isDate(expirationDate)){
+                return res.status(400).send(responseMessageFormat(false, 'Invalid expirationDate; It must be a datetime field'));
+            }
             if (!user) {
                 return res.status(400).send(responseMessageFormat(false, 'user object is not passed in the body'));
             }

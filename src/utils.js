@@ -56,3 +56,7 @@ export function responseMessageFormat(success, message, data = {}) {
         }
     }
 }
+
+export function isDate (date){
+    return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
+}
