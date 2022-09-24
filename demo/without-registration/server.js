@@ -71,5 +71,5 @@ httpsLocalhost.getCerts().then(cert => {
         console.log(`${TIME()} The server is running on port : ${port}`)
     })
 }).catch(e => {
-    console.log(e)
+    console.log(e.message)
 })

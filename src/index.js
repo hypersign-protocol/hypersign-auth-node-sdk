@@ -129,7 +129,7 @@ module.exports = class HypersignAuth {
         try {
             const { baseUrl } = req.body;
             if(!baseUrl) throw new Error("BaseUrl is not passed");
-            const clientId = clientStore.addClient(null);
+            const clientId = await clientStore.addClient(null);
             clientStore.emit('startTimer', {clientId: clientId, time: 60000});
             const QRData = this.ws.getQRData(baseUrl, clientId);
             req.body.qrData = QRData;
