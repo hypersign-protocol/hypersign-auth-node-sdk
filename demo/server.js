@@ -10,10 +10,11 @@ const server = http.createServer(app)
 const cors = require('cors');
 const TIME = () => new Date();
 
-const whitelistedUrls = ["http://localhost:4999", "*"]
+const whitelistedUrls = ["http://localhost:4999", "*","https://wallet-stage.hypersign.id"]
 
 function corsOptionsDelegate(req, callback) {
     let corsOptions;
+    console.log(req.header('Origin'));
     if (whitelistedUrls.indexOf(req.header('Origin')) !== -1) {
         corsOptions = { origin: true } // reflect (enable) the requested origin in the CORS response
     } else {
@@ -30,8 +31,8 @@ app.use(express.static("public"));
 let hypersign;
 
 const walletOptions = {
-    hidNodeRPCUrl: 'https://jagrat.hypersign.id/node1/rpc/',
-    hidNodeRestUrl: 'https://jagrat.hypersign.id/node1/rest/',
+    hidNodeRPCUrl: 'https://jagrat.hypersign.id/rpc/',
+    hidNodeRestUrl: 'https://jagrat.hypersign.id/rest/',
 };
 const hidWalletInstance = new HIDWallet(walletOptions);
 hidWalletInstance.generateWallet({ mnemonic }).then(async() => {
@@ -46,12 +47,12 @@ hidWalletInstance.generateWallet({ mnemonic }).then(async() => {
         });
 
         app.use(authRoutes(hypersign))
+        server.listen(port, () => {
+            console.log(`${TIME()} The server is running on port : ${port}`)
+        })
 
     })
     .catch(e => {
         console.error(e)
     })
 
-server.listen(port, () => {
-    console.log(`${TIME()} The server is running on port : ${port}`)
-})

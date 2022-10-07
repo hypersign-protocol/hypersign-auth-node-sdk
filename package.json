@@ -23,7 +23,7 @@
     "author": "Vishwas Anand Bhushan",
     "license": "MIT",
     "dependencies": {
-        "hs-ssi-sdk": "^6.1.1",
+        "hs-ssi-sdk": "github:hypersign-protocol/hid-ssi-js-sdk#develop",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",

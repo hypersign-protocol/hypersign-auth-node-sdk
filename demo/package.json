@@ -12,6 +12,6 @@
         "cors": "^2.8.5",
         "express": "^4.17.1",
         "hid-hd-wallet": "git+https://github.com/hypersign-protocol/hid-hd-wallet.git#ssi-integration",
-        "hypersign-auth-node-sdk": "git+https://github.com/hypersign-protocol/hypersign-auth-node-sdk.git#ssi-integration"
+        "hypersign-auth-node-sdk": "../../hypersign-auth-node-sdk"
     }
 }
