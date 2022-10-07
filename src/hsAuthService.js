@@ -69,16 +69,20 @@ module.exports = class HypersignAuthService {
      * @param { String } challenge  // challenge
      * @returns boolean 
      */
-    async verifyPresentation(vpObj, challenge) {
+    async verifyPresentation(vpObj, challenge,holderDidDocSigned) {
         if (!vpObj) throw new Error('HS-AUTH-NODE-SDK:: Error: presentation is null')
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
+
         const vc = vpObj.verifiableCredential[0];
+        const holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
         const result = await this.hsSDKVP.verifyPresentation({
             signedPresentation: vpObj,
             challenge,
             domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
             issuerDid: vc.issuer,
-            holderDid: vc.credentialSubject.id,
+            holderDidDocSigned:holderDidDocSignedtemp,
+            holderVerificationMethodId:holderDidDocSignedtemp.authentication[0],
+            issuerVerificationMethodId: vc.issuer+'#key-1'
         })
         const { verified } = result;
         return verified;
@@ -213,18 +217,18 @@ let options={}
      * @returns accessToken and refreshToken
      */
     async authenticate(body) {
-        const { challenge, vp } = body;
+        const { challenge, vp ,holderDidDocSigned} = body;
         if (this.isSubcriptionEnabled) {
             await this.checkSubscription();
             if (!this.isSubscriptionSuccess) throw new Error('HS-AUTH-NODE-SDK:: Error: Subscription check unsuccessfull')
         }
-
+        
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
 
         logger.debug("HS-AUTH:: Presentation is being verified...")
 
-        if (!(await this.verifyPresentation(vpObj, challenge))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
+        if (!(await this.verifyPresentation(vpObj, challenge,holderDidDocSigned))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
 
         // TODO:  need to find out if we are missing any imp parameter in the options.
         // what is the proper way to JWT sign 
