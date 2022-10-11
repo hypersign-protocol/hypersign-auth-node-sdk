@@ -74,20 +74,31 @@ module.exports = class HypersignAuthService {
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
 
         const vc = vpObj.verifiableCredential[0];
-        let holderDidDocSignedtemp;
+       
+       let options
         if(holderDidDocSigned){
-         holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
+        const   holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
+            options={
+                signedPresentation: vpObj,
+                challenge,
+                domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
+                issuerDid: vc.issuer,
+                holderDidDocSigned:holderDidDocSignedtemp,
+                holderVerificationMethodId:vpObj.proof.verificationMethod,
+                issuerVerificationMethodId: vc.issuer+'#key-1'
+            }
+        }else{
+            options={
+                signedPresentation: vpObj,
+                challenge,
+                domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
+                issuerDid: vc.issuer,
+                holderDid:vc.credentialSubject.id,
+                holderVerificationMethodId:vpObj.proof.verificationMethod,
+                issuerVerificationMethodId: vc.issuer+'#key-1'
+            }
         }
-        const result = await this.hsSDKVP.verifyPresentation({
-            signedPresentation: vpObj,
-            challenge,
-            domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
-            issuerDid: vc.issuer,
-            holderDid:vc.credentialSubject.id,
-            holderDidDocSigned:holderDidDocSignedtemp,
-            holderVerificationMethodId:vpObj.proof.verificationMethod,
-            issuerVerificationMethodId: vc.issuer+'#key-1'
-        })
+        const result = await this.hsSDKVP.verifyPresentation(options)
         const { verified } = result;
         return verified;
     }
