@@ -74,14 +74,18 @@ module.exports = class HypersignAuthService {
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
 
         const vc = vpObj.verifiableCredential[0];
-        const holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
+        let holderDidDocSignedtemp;
+        if(holderDidDocSigned){
+         holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
+        }
         const result = await this.hsSDKVP.verifyPresentation({
             signedPresentation: vpObj,
             challenge,
             domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
             issuerDid: vc.issuer,
+            holderDid:vc.credentialSubject.id,
             holderDidDocSigned:holderDidDocSignedtemp,
-            holderVerificationMethodId:holderDidDocSignedtemp.authentication[0],
+            holderVerificationMethodId:vpObj.proof.verificationMethod,
             issuerVerificationMethodId: vc.issuer+'#key-1'
         })
         const { verified } = result;
@@ -105,7 +109,7 @@ module.exports = class HypersignAuthService {
         delete userData['did'];
         
         logger.debug("HS-AUTH:: Credential is being generated...")
-let options={}
+    let options={}
         if(didDoc){
             options = {
                 schemaId,
