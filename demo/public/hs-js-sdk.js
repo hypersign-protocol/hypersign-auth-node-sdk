@@ -716,7 +716,7 @@
             let t = { LISTENER_MODE: document.currentScript.getAttribute("data-listener-mode") ? document.currentScript.getAttribute("data-listener-mode") : we, RP_SOCKET_URL: document.currentScript.getAttribute("data-rp-socket-url"), RP_SERVER_BASEURL: document.currentScript.getAttribute("data-rp-server-base-url"), RP_CHALLENGE_RESOURCE: document.currentScript.getAttribute("data-rp-challege-resource") ? document.currentScript.getAttribute("data-rp-challege-resource") : "/api/v1/auth/challenge", RP_POLLING_RESOURCE: document.currentScript.getAttribute("data-rp-polling-resource") ? document.currentScript.getAttribute("data-rp-polling-resource") : "/api/v1/auth/poll", LOGIN_BUTTON_TEXT: document.currentScript.getAttribute("data-login-button-text") ? document.currentScript.getAttribute("data-login-button-text") : "LOGIN USING HYPERSIGN", NETWORK_MODE: document.currentScript.getAttribute("data-network-mode") ? document.currentScript.getAttribute("data-network-mode") : me, POLLING_INTERVAL: document.currentScript.getAttribute("data-polling-interval") ? parseInt(document.currentScript.getAttribute("data-polling-interval")) : 5e3, HS_WALLET_BASEURL: "" };
             switch (t.NETWORK_MODE) {
                 case me:
-                    t.HS_WALLET_BASEURL = "http://localhost:4999/chrome/popup/popup#"//"https://wallet-stage.hypersign.id";
+                    t.HS_WALLET_BASEURL = "https://wallet-stage.hypersign.id";
                     break;
                 case Ee:
                     throw new Error("HSAuth:: MAIN Network is not supported yet")
