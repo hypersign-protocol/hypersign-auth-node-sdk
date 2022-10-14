@@ -1,7 +1,7 @@
 {
     "name": "hypersign-auth-node-sdk",
-    "version": "4.0.0",
-    "description": "JS SDK to intergrate Hypersign passwordless authentication with Node js backend",
+    "version": "6.1.0",
+    "description": "Node JS SDK to intergrate Hypersign passwordless authentication in the backend",
     "main": "dist/hypersign-auth-node-sdk.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -14,19 +14,21 @@
         "hypersign",
         "HID",
         "passwordless",
+        "openId",
         "blockchain",
         "ssi",
         "privacy",
         "authorization",
         "authentication"
     ],
-    "author": "Vishwas Anand Bhushan",
+    "author": "Team Hypersign",
     "license": "MIT",
     "dependencies": {
-        "hs-ssi-sdk": "^5.0.0",
+        "hs-ssi-sdk": "^6.2.0",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",
+        "ramda": "^0.28.0",
         "simple-node-logger": "^21.8.12",
         "uuid": "^8.3.2",
         "websocket": "^1.0.33"
@@ -43,9 +45,9 @@
         "@babel/runtime": "^7.10.2",
         "babel-loader": "^8.0.0-beta.2",
         "babel-plugin-ramda": "^2.0.0",
+        "prettier": "^2.4.1",
         "webpack": "^4.36.1",
         "webpack-bundle-analyzer": "^3.6.1",
-        "webpack-cli": "3.3.8",
-        "prettier": "^2.4.1"
+        "webpack-cli": "3.3.8"
     }
 }
