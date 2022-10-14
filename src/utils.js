@@ -22,9 +22,9 @@ export async function fetchData(url, options) {
 }
 
 export function checkSlash(baseUrl) {
-    if(!baseUrl) throw new Error("baseUrl is null or empty");
+    if (!baseUrl) throw new Error("HS-AUTH-NODE-SDK:: Error: baseUrl is null or empty");
     baseUrl = baseUrl.trim();
-    if (!baseUrl.endsWith('/')) 
+    if (!baseUrl.endsWith('/'))
         return baseUrl + '/';
     else
         return baseUrl;
@@ -47,12 +47,16 @@ export function extractRfToken(req) {
 }
 
 
-export function responseMessageFormat(success, message, data = {} ){
-    return { 
+export function responseMessageFormat(success, message, data = {}) {
+    return {
         hypersign: {
             success,
             message,
             data
         }
     }
-} 
+}
+
+export function isDate (date){
+    return (new Date(date) !== "Invalid Date") && !isNaN(new Date(date));
+}

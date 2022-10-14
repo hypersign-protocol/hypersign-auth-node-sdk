@@ -25,12 +25,12 @@ module.exports = class ClientStore extends EventEmitter {
   }
 
   getClient(clientId) {
-    if (!this.clients[clientId]) throw new Error('Invalid challenge');
+    if (!this.clients[clientId]) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid challenge');
     return this.clients[clientId];
   }
 
   updateClient(clientId, connection, isAuthenticated, accessToken, refreshToken) {
-    if (!this.clients[clientId]) throw new Error('Invalid challenge');
+    if (!this.clients[clientId]) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid challenge');
     let updatedClient = this.clients[clientId];
     if (connection) updatedClient['connection'] = connection;
     if (isAuthenticated) updatedClient['isAuthenticated'] = isAuthenticated;
@@ -41,7 +41,7 @@ module.exports = class ClientStore extends EventEmitter {
   }
 
   deleteClient(clientId) {
-    //if (!this.clients[clientId]) throw new Error('Client does not exist')
+    //if (!this.clients[clientId]) throw new Error('HS-AUTH-NODE-SDK:: Error: Client does not exist')
     delete this.clients[clientId];
     return Object.keys(this.clients).length;
   }
