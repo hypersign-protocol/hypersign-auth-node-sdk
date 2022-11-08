@@ -142,7 +142,8 @@ module.exports = class HypersignAuthService {
             credential,
             issuerDid: issuerKeys.publicKey.id,
             privateKey: issuerKeys.privateKeyBase58,
-            verificationMethodId
+            verificationMethodId,
+            registerCredential: false,
         }
         const signedCredential = await this.hsSdkVC.issueCredential(signOptions)
         return signedCredential
