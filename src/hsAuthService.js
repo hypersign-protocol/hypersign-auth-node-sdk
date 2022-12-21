@@ -67,6 +67,7 @@ module.exports = class HypersignAuthService {
      * @returns boolean 
      */
     async verifyPresentation(vpObj, challenge, holderDidDocSigned) {
+        console.log("Verifying presentation");
         if (!vpObj) throw new Error('HS-AUTH-NODE-SDK:: Error: presentation is null')
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
 
