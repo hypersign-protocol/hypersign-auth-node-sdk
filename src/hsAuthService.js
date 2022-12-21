@@ -71,7 +71,7 @@ module.exports = class HypersignAuthService {
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
 
         const vc = vpObj.verifiableCredential[0];
-
+        console.log("vc", vc);
         let options
         if (holderDidDocSigned) {
             const holderDidDocSignedtemp = JSON.parse(holderDidDocSigned)
