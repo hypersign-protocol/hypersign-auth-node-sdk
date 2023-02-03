@@ -66,33 +66,34 @@ module.exports = class HypersignAuthService {
      * @param { String } challenge  // challenge
      * @returns boolean 
      */
-    async verifyPresentation(vpObj, challenge,holderDidDocSigned) {
+    async verifyPresentation(vpObj, challenge, holderDidDocSigned) {
+        console.log("Verifying presentation");
         if (!vpObj) throw new Error('HS-AUTH-NODE-SDK:: Error: presentation is null')
         if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
 
         const vc = vpObj.verifiableCredential[0];
-       
-       let options
-        if(holderDidDocSigned){
-        const   holderDidDocSignedtemp=JSON.parse(holderDidDocSigned)
-            options={
+        console.log("vc", vc);
+        let options
+        if (holderDidDocSigned) {
+            const holderDidDocSignedtemp = JSON.parse(holderDidDocSigned)
+            options = {
                 signedPresentation: vpObj,
                 challenge,
                 domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
                 issuerDid: vc.issuer,
-                holderDidDocSigned:holderDidDocSignedtemp,
-                holderVerificationMethodId:vpObj.proof.verificationMethod,
-                issuerVerificationMethodId: vc.issuer+'#key-1'
+                holderDidDocSigned: holderDidDocSignedtemp,
+                holderVerificationMethodId: vpObj.proof.verificationMethod,
+                issuerVerificationMethodId: vc.issuer + '#key-1'
             }
-        }else{
-            options={
+        } else {
+            options = {
                 signedPresentation: vpObj,
                 challenge,
                 domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
                 issuerDid: vc.issuer,
-                holderDid:vc.credentialSubject.id,
-                holderVerificationMethodId:vpObj.proof.verificationMethod,
-                issuerVerificationMethodId: vc.issuer+'#key-1'
+                holderDid: vc.credentialSubject.id,
+                holderVerificationMethodId: vpObj.proof.verificationMethod,
+                issuerVerificationMethodId: vc.issuer + '#key-1'
             }
         }
         const result = await this.hsSDKVP.verifyPresentation(options)
@@ -105,7 +106,7 @@ module.exports = class HypersignAuthService {
      * @param { Object } userData 
      * @returns signed VC
      */
-    async generateCredential(userData, expirationDate,didDoc) {
+    async generateCredential(userData, expirationDate, didDoc) {
         // const schemaUrl = this.options.hidNodeURL + '/api/v1/schema/' + this.options.schemaId;
         const schemaId = this.options.schemaId;
         const issuerKeys = this.options.keys;
@@ -115,10 +116,10 @@ module.exports = class HypersignAuthService {
         delete userData['iat'];
         delete userData['exp'];
         delete userData['did'];
-        
+
         logger.debug("HS-AUTH:: Credential is being generated...")
-    let options={}
-        if(didDoc){
+        let options = {}
+        if (didDoc) {
             options = {
                 schemaId,
                 subjectDidDocSigned: didDoc,
@@ -126,7 +127,7 @@ module.exports = class HypersignAuthService {
                 expirationDate,
                 fields: userData
             }
-        }else{
+        } else {
             options = {
                 schemaId,
                 subjectDid: did,
@@ -134,17 +135,20 @@ module.exports = class HypersignAuthService {
                 expirationDate,
                 fields: userData
             }
-        }       
+        }
         const credential = await this.hsSdkVC.getCredential(options)
         logger.debug("HS-AUTH:: Credential is being signed...")
-        const verificationMethodId = issuerKeys.publicKey.id+"#key-1";
+        const verificationMethodId = issuerKeys.publicKey.id + "#key-1";
         const signOptions = {
             credential,
             issuerDid: issuerKeys.publicKey.id,
             privateKey: issuerKeys.privateKeyBase58,
-            verificationMethodId
+            verificationMethodId,
+            registerCredential: false,
         }
         const signedCredential = await this.hsSdkVC.issueCredential(signOptions)
+        const txn_message = await this.hsSdkVC.generateRegisterCredentialStatusTxnMessage(signedCredential.credentialStatus, signedCredential.proof)
+        signedCredential.txn = txn_message
         return signedCredential
     }
 
@@ -229,18 +233,18 @@ module.exports = class HypersignAuthService {
      * @returns accessToken and refreshToken
      */
     async authenticate(body) {
-        const { challenge, vp ,holderDidDocSigned} = body;
+        const { challenge, vp, holderDidDocSigned } = body;
         if (this.isSubcriptionEnabled) {
             await this.checkSubscription();
             if (!this.isSubscriptionSuccess) throw new Error('HS-AUTH-NODE-SDK:: Error: Subscription check unsuccessfull')
         }
-        
+
         const vpObj = JSON.parse(vp);
         const subject = vpObj['verifiableCredential'][0]['credentialSubject'];
 
         logger.debug("HS-AUTH:: Presentation is being verified...")
 
-        if (!(await this.verifyPresentation(vpObj, challenge,holderDidDocSigned))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
+        if (!(await this.verifyPresentation(vpObj, challenge, holderDidDocSigned))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
 
         // TODO:  need to find out if we are missing any imp parameter in the options.
         // what is the proper way to JWT sign 
@@ -324,7 +328,7 @@ module.exports = class HypersignAuthService {
      * @param { boolean } isThridPartyAuth 
      * @returns null
      */
-    async register(user, isThridPartyAuth = false, expirationDate,didDoc) {
+    async register(user, isThridPartyAuth = false, expirationDate, didDoc) {
         if (!this.mailService) throw new Error("HS-AUTH-NODE-SDK:: Error: Mail configuration is not defined");
         if (!this.verifyResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: VerifyResourcePath is not set in configuration file")
 
@@ -335,7 +339,7 @@ module.exports = class HypersignAuthService {
 
             if (!did) throw new Error("HS-AUTH-NODE-SDK:: Error: Did must be passed with thirdparty auth request");
 
-            const verifiableCredential = await this.generateCredential(user, expirationDate,didDoc);
+            const verifiableCredential = await this.generateCredential(user, expirationDate, didDoc);
             return verifiableCredential;
         }
 
