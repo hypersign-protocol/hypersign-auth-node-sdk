@@ -96,7 +96,7 @@ module.exports = class HypersignAuthService {
                 issuerVerificationMethodId: vc.issuer + '#key-1'
             }
         }
-        const result = await this.hsSDKVP.verifyPresentation(options)
+        const result = await this.hsSDKVP.verify(options)
         const { verified } = result;
         return verified;
     }
@@ -163,7 +163,7 @@ module.exports = class HypersignAuthService {
             issuerKeys.publicKey.id
         );
         const challenge = uuid4();
-        const signedPresentation = await this.hsSdkVC.signPresentation(presentation, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58, challenge)
+        const signedPresentation = await this.hsSdkVC.sign(presentation, issuerKeys.publicKey.id, issuerKeys.privateKeyBase58, challenge)
         return signedPresentation
     }
 
