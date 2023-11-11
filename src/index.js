@@ -33,7 +33,7 @@ module.exports = class HypersignAuth {
         if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid credentialSubject');
         if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("HS-AUTH-NODE-SDK:: Error: BaseUrl is not present in hypersign.json");
         if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: AuthResourcePath is not present in hypersign.json");
-        if(!hsConfigJson.namespace) {
+        if (!hsConfigJson.namespace) {
             logger.debug('HS-AUTH::DID namespace is not passed. Continuing with mainnet')
         }
 
@@ -44,7 +44,7 @@ module.exports = class HypersignAuth {
             rft: {},
             appCredential: {},
             offlineSigner,
-            namespace:"",
+            namespace: "",
         };
         Object.assign(this.options.mail, hsConfigJson.mail);
         Object.assign(this.options.keys, hsConfigJson.keys);
@@ -105,7 +105,7 @@ module.exports = class HypersignAuth {
     async authenticate(req, res, next) {
         try {
             const data = await this.middlewareService.authenticate(req.body);
-            Object.assign(req.body, {...responseMessageFormat(true, "Authenticated successfully", {...data }) });
+            Object.assign(req.body, { ...responseMessageFormat(true, "Authenticated successfully", { ...data }) });
             next();
         } catch (e) {
             logger.error(e)
@@ -126,7 +126,7 @@ module.exports = class HypersignAuth {
             if (!refreshToken) throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Refresh Token is not sent in header")
 
             const newtokens = await this.middlewareService.refresh(refreshToken);
-            Object.assign(req.body, {...responseMessageFormat(true, "New pair of tokens", {...newtokens }) });
+            Object.assign(req.body, { ...responseMessageFormat(true, "New pair of tokens", { ...newtokens }) });
             next()
         } catch (error) {
             logger.error(error.message)
@@ -165,7 +165,7 @@ module.exports = class HypersignAuth {
             const authToken = extractToken(req);
             if (!authToken) throw new Error('HS-AUTH-NODE-SDK:: Error: Authorization token is not passed in the header')
             const userData = await this.middlewareService.authorize(authToken)
-            Object.assign(req.body, {...responseMessageFormat(true, "Authorized successfully", {...userData }) });
+            Object.assign(req.body, { ...responseMessageFormat(true, "Authorized successfully", { ...userData }) });
             next();
         } catch (e) {
             logger.error(e)
@@ -183,10 +183,10 @@ module.exports = class HypersignAuth {
     async register(req, res, next) {
         try {
             const { user, isThridPartyAuth, expirationDate } = req.body;
-            if(!expirationDate){
+            if (!expirationDate) {
                 return res.status(400).send(responseMessageFormat(false, 'Creadential expirationDate must be passed'));
             }
-            if(!isDate(expirationDate)){
+            if (!isDate(expirationDate)) {
                 return res.status(400).send(responseMessageFormat(false, 'Invalid expirationDate; It must be a datetime field'));
             }
             if (!user) {
@@ -194,7 +194,7 @@ module.exports = class HypersignAuth {
             }
             const vc = await this.middlewareService.register(user, isThridPartyAuth ? isThridPartyAuth : false, expirationDate);
             if (vc) {
-                Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", {...vc }) });
+                Object.assign(req.body, { ...responseMessageFormat(true, "Verifiable Credential", { ...vc }) });
             }
             next();
         } catch (e) {
@@ -222,7 +222,7 @@ module.exports = class HypersignAuth {
             }
 
             const vc = await this.middlewareService.getCredential(authToken, userDid);
-            Object.assign(req.body, {...responseMessageFormat(true, "Verifiable Credential", {...vc }) });
+            Object.assign(req.body, { ...responseMessageFormat(true, "Verifiable Credential", { ...vc }) });
             next();
         } catch (e) {
             logger.error(e)
@@ -241,7 +241,7 @@ module.exports = class HypersignAuth {
             const clientId = clientStore.addClient(null);
             clientStore.emit('startTimer', { clientId: clientId, time: 120000 });
             const QRData = this.ws.getQRData(clientId);
-            Object.assign(req.body, {...responseMessageFormat(true, "New session data", QRData) })
+            Object.assign(req.body, { ...responseMessageFormat(true, "New session data", QRData) })
             next();
         } catch (e) {
             res.status(400).send(responseMessageFormat(false, e.message));
@@ -266,7 +266,7 @@ module.exports = class HypersignAuth {
                 return res.status(400).send(responseMessageFormat(false, "Challenge is not passed in the request body or query parameter"))
             }
             const tokens = await this.middlewareService.poll({ challenge });
-            Object.assign(req.body, {...responseMessageFormat(true, 'User is authenticated', {...tokens }) })
+            Object.assign(req.body, { ...responseMessageFormat(true, 'User is authenticated', { ...tokens }) })
             next();
         } catch (e) {
             res.status(401).send(responseMessageFormat(false, e.message));
