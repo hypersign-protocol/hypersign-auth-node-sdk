@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const HypersignSsiSDK = require('hs-ssi-sdk');
+const { HypersignSSISdk } = require('hs-ssi-sdk');
 const regMailTemplate = require('./mail/mail.template');
 const MailService = require('./mail/mail.service');
 const { clientStore, tokenStore, logger } = require('./config');
@@ -54,7 +54,14 @@ module.exports = class HypersignAuthService {
 
 
     async init() {
-        const hsSdk = new HypersignSsiSDK(this.options.offlineSigner, this.options.hidNodeURL, this.options.hidNodeRestURL, this.options.namespace);
+        const constructorParams = {
+            offlineSigner: this.options.offlineSigner,
+            nodeRestEndpoint: this.options.hidNodeRestURL,
+            nodeRpcEndpoint: this.options.hidNodeURL,
+            namespace: this.options.namespace,
+        };
+
+        const hsSdk = new HypersignSSISdk(constructorParams);
         await hsSdk.init();
         this.hsSdkVC = hsSdk.vc;
         this.hsSDKVP = hsSdk.vp;
