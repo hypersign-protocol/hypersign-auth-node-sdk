@@ -103,7 +103,7 @@ module.exports = class HypersignAuthService {
                 issuerVerificationMethodId: vc.issuer + '#key-1'
             }
         }
-        const result = await this.hsSDKVP.verifyPresentation(options)
+        const result = await this.hsSDKVP.verify(options)
         const { verified } = result;
         return verified;
     }
