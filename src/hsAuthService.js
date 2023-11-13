@@ -239,7 +239,7 @@ module.exports = class HypersignAuthService {
      * @param { object } body 
      * @returns accessToken and refreshToken
      */
-    async authenticate(body) {
+    async authenticate(body, appUserID = '') {
         const { challenge, vp, holderDidDocSigned } = body;
         if (this.isSubcriptionEnabled) {
             await this.checkSubscription();
@@ -252,6 +252,11 @@ module.exports = class HypersignAuthService {
         logger.debug("HS-AUTH:: Presentation is being verified...")
 
         if (!(await this.verifyPresentation(vpObj, challenge, holderDidDocSigned))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
+
+
+        if (appUserID && appUserID != '') {
+            subject['appUserID'] = newuserID;
+        }
 
         // TODO:  need to find out if we are missing any imp parameter in the options.
         // what is the proper way to JWT sign 

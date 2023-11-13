@@ -102,9 +102,9 @@ module.exports = class HypersignAuth {
      * @param { Response } res 
      * @param { Next } next 
      */
-    async authenticate(req, res, next) {
+    async authenticate(req, res, next, appUserId = '') {
         try {
-            const data = await this.middlewareService.authenticate(req.body);
+            const data = await this.middlewareService.authenticate(req.body, appUserId);
             Object.assign(req.body, { ...responseMessageFormat(true, "Authenticated successfully", { ...data }) });
             next();
         } catch (e) {
