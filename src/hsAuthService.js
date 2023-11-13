@@ -255,7 +255,7 @@ module.exports = class HypersignAuthService {
 
 
         if (appUserID && appUserID != '') {
-            subject['appUserID'] = newuserID;
+            subject['appUserID'] = appUserID;
         }
 
         // TODO:  need to find out if we are missing any imp parameter in the options.
