@@ -4,37 +4,125 @@ const fs = require('fs');
 const path = require('path');
 const { clientStore, logger } = require('./config');
 const { extractToken, extractRfToken, responseMessageFormat, isDate } = require('./utils');
-
+const { randomUUID } = require('crypto');
 
 const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
 
+
+const hidNetworkUrls = Object.freeze({
+    testnet: {
+        rpc: 'https://rpc.jagrat.hypersign.id/',
+        rest: 'https://api.jagrat.hypersign.id/',
+    }
+})
+
+
+const hsJson = {
+    "networkUrl": "https://rpc.jagrat.hypersign.id/",
+    "networkRestUrl": "https://api.jagrat.hypersign.id/",
+    "jwt": {
+        "secret": "00c2c433-a077-4e68-b19c-1234f014a510",
+        "expiryTime": 120000
+    },
+    "rft": {
+        "secret": "00c2c433-a077-4e68-b19c-1234f014a510",
+        "expiryTime": 120000
+    },
+    "appCredential": {
+        "credentialSubject": {
+            "name": "Entity Developer Dashboard",
+            "did": "did:hid:testnet:z8uyZoEA2JTCMWfadrSPaqyWmwzwc3qAwAM4snVrfLKue",
+            "owner": "did:hid:testnet:z8uyZoEA2JTCMWfadrSPaqyWmwzwc3qAwAM4snVrfLKue",
+            "schemaId": "sch:hid:testnet:zufjU7LuQuJNFiUpuhCwYkTrakUu1VmtxE9SPi5TwfUB:1.0",
+            "serviceEp": "http://localhost:3002",
+            "verifyResourcePath": "",
+            "id": "did:hid:testnet:z8uyZoEA2JTCMWfadrSPaqyWmwzwc3qAwAM4snVrfLKue",
+        }
+    },
+    "namespace": "testnet",
+    isSubcriptionEnabled: false,
+}
+
+
 module.exports = class HypersignAuth {
 
-    constructor(server, offlineSigner) {
+    constructor(server, offlineSigner, options = {}) {
         ////
         // Making it backward compatible
         const hsFilePath = path.join(__dirname, '../../../', HYPERSIGN_CONFIG_FILE);
         const hsFilePathDev = path.join(__dirname, '../', HYPERSIGN_CONFIG_FILE)
-        if (!fs.existsSync(hsFilePath) && !fs.existsSync(hsFilePathDev)) throw new Error('HS-AUTH-NODE-SDK:: Error: ' + HYPERSIGN_CONFIG_FILE + ' file does not exist. Generate ' + HYPERSIGN_CONFIG_FILE + ' file from the developer dashboard; filePath = ' + hsFilePath);
+        let hypersignConfig;
+        let hsConfigJson;
+        if (!fs.existsSync(hsFilePath) && !fs.existsSync(hsFilePathDev)) {
+            if (options.accessToken) {
+                Object.assign(hsJson.jwt, options.accessToken)
+            } else {
+                hsJson.jwt.secret = randomUUID()
+                hsJson.jwt.expiryTime = 120000
+            }
 
-        const hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
+            if (options.refreshToken) {
+                Object.assign(hsJson.rft, options.refreshToken)
+            } else {
+                hsJson.rft.secret = randomUUID()
+                hsJson.rft.expiryTime = 120000
+            }
 
-        const hsConfigJson = JSON.parse(hypersignConfig);
+            if (options.networkUrl && options.networkUrl != '') {
+                hsJson.networkUrl = options.networkUrl
+            } else {
+                hsJson.networkUrl = hidNetworkUrls.testnet.rpc
+            }
+
+            if (options.networkRestUrl && options.networkRestUrl != "") {
+                hsJson.networkRestUrl = options.networkRestUrl
+            } else {
+                hsJson.networkRestUrl = hidNetworkUrls.testnet.rest
+            }
+
+            if (options.serviceName && options.serviceName != "") {
+                hsJson.appCredential.credentialSubject.name = options.serviceName
+            } else {
+                throw new Error("serviceName property is required")
+            }
+
+            if (options.schemaId && options.schemaId != "") {
+                hsJson.appCredential.credentialSubject.schemaId = options.schemaId
+            } else {
+                throw new Error("schemaId property is required")
+            }
+
+            if (options.serviceEp && options.serviceEp != "") {
+                hsJson.appCredential.credentialSubject.serviceEp = options.serviceEp
+            } else {
+                throw new Error("serviceEp property is required")
+            }
+
+            if (options.verifyResourcePath) {
+                hsJson.appCredential.credentialSubject.verifyResourcePath = options.verifyResourcePath
+            }
+
+
+
+            hsConfigJson = hsJson;
+        } else {
+            hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
+            hsConfigJson = JSON.parse(hypersignConfig);
+        }
 
         // TODO: we can delete this later. this is to make backward compatibility
         hsConfigJson.appCredential.credentialSubject.authResourcePath = !hsConfigJson.appCredential.credentialSubject.authResourcePath ? "hs/api/v2/auth" : hsConfigJson.appCredential.credentialSubject.authResourcePath;
         hsConfigJson.appCredential.credentialSubject.baseUrl = !hsConfigJson.appCredential.credentialSubject.baseUrl ? hsConfigJson.appCredential.credentialSubject.serviceEp : hsConfigJson.appCredential.credentialSubject.baseUrl;
 
-
-        if (hsConfigJson.keys == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Cryptographic keys is not set');
-        if (hsConfigJson.networkUrl == "") throw new Error('HS-AUTH-NODE-SDK:: Error: Network RPC Url is not set');
-        if (hsConfigJson.networkRestUrl == "") throw new Error('HS-AUTH-NODE-SDK:: Error: Network REST Url is not set');
-        if (hsConfigJson.appCredential == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: App Credential is not set');
-        if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('HS-AUTH-NODE-SDK:: Error: Invalid credentialSubject');
-        if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("HS-AUTH-NODE-SDK:: Error: BaseUrl is not present in hypersign.json");
-        if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: AuthResourcePath is not present in hypersign.json");
+        if (hsConfigJson.keys == {}) throw new Error('Cryptographic keys is not set');
+        if (hsConfigJson.networkUrl == "") throw new Error('Network RPC Url is not set');
+        if (hsConfigJson.networkRestUrl == "") throw new Error('Network REST Url is not set');
+        if (hsConfigJson.appCredential == {}) throw new Error('App Credential is not set');
+        if (hsConfigJson.appCredential.credentialSubject == {}) throw new Error('Invalid credentialSubject');
+        if (!hsConfigJson.appCredential.credentialSubject.baseUrl) throw new Error("BaseUrl is not present in hypersign.json");
+        if (!hsConfigJson.appCredential.credentialSubject.authResourcePath) throw new Error("AuthResourcePath is not present in hypersign.json");
         if (!hsConfigJson.namespace) {
-            logger.debug('HS-AUTH::DID namespace is not passed. Continuing with mainnet')
+            logger.debug('DID namespace is not passed. Continuing with mainnet')
         }
 
         this.options = {
@@ -45,6 +133,7 @@ module.exports = class HypersignAuth {
             appCredential: {},
             offlineSigner,
             namespace: "",
+            namespace: "testnet"
         };
         Object.assign(this.options.mail, hsConfigJson.mail);
         Object.assign(this.options.keys, hsConfigJson.keys);
@@ -59,21 +148,21 @@ module.exports = class HypersignAuth {
 
         if (!hsConfigJson.jwt) {
             const jwtDefault = {
-                secret: 'BadsecretKey1@',
+                secret: randomUUID(),
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(this.options.jwt, jwtDefault)
-            logger.debug('HS-AUTH:: JWT configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
+            logger.debug('AccessToken configuration not passed. Taking default configuration.. Secret = ' + jwtDefault.secret + ' ExpiryTime = ' + jwtDefault.expiryTime)
         } else {
             Object.assign(this.options.jwt, hsConfigJson.jwt)
         }
         if (!hsConfigJson.rft) {
             const rftDefault = {
-                secret: 'BadsecretKey1@',
+                secret: randomUUID(),
                 expiryTime: '900s' // epires in 15 mins
             }
             Object.assign(this.options.rft, rftDefault)
-            logger.debug('HS-AUTH:: Refresh Token configuration not passed. Taking default configuration.. Secret = ' + rftDefault.secret + ' ExpiryTime = ' + rftDefault.expiryTime)
+            logger.debug('Refresh Token configuration not passed. Taking default configuration.. Secret = ' + rftDefault.secret + ' ExpiryTime = ' + rftDefault.expiryTime)
         } else {
             Object.assign(this.options.rft, hsConfigJson.rft)
         }
@@ -123,7 +212,7 @@ module.exports = class HypersignAuth {
     async refresh(req, res, next) {
         try {
             const refreshToken = extractRfToken(req);
-            if (!refreshToken) throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Refresh Token is not sent in header")
+            if (!refreshToken) throw new Error("Unauthorized: Refresh Token is not sent in header")
 
             const newtokens = await this.middlewareService.refresh(refreshToken);
             Object.assign(req.body, { ...responseMessageFormat(true, "New pair of tokens", { ...newtokens }) });
@@ -143,7 +232,7 @@ module.exports = class HypersignAuth {
     async logout(req, res, next) {
         try {
             const refreshToken = extractRfToken(req);
-            if (!refreshToken) throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Refresh Token is not sent in header")
+            if (!refreshToken) throw new Error("Unauthorized: Refresh Token is not sent in header")
 
             await this.middlewareService.logout(refreshToken);
             // everthing is ok but there is no content
@@ -163,7 +252,7 @@ module.exports = class HypersignAuth {
     async authorize(req, res, next) {
         try {
             const authToken = extractToken(req);
-            if (!authToken) throw new Error('HS-AUTH-NODE-SDK:: Error: Authorization token is not passed in the header')
+            if (!authToken) throw new Error('Authorization token is not passed in the header')
             const userData = await this.middlewareService.authorize(authToken)
             Object.assign(req.body, { ...responseMessageFormat(true, "Authorized successfully", { ...userData }) });
             next();

@@ -21,7 +21,7 @@ module.exports = class HypersignAuthService {
         this.options.mail = options && options.mail ? options.mail : mail;
 
         if (!options.offlineSigner) {
-            throw new Error('HS-AUTH-NODE-SDK:: Error: OfflineSigner is required for initilizing Hypersign Auth Service')
+            throw new Error('OfflineSigner is required for initilizing Hypersign Auth Service')
         }
         this.options.offlineSigner = options.offlineSigner
 
@@ -42,7 +42,7 @@ module.exports = class HypersignAuthService {
 
         this.options.appCredential = options.appCredential;
         this.developerDashboardVerifyApi = `${sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
-        this.mailService = this.options.mail && this.options.mail.host != "" ? new MailService({ ...this.options.mail }) : null;
+        this.mailService = this.options.mail && Object.keys(this.options.mail) > 0 ? new MailService({ ...this.options.mail }) : null;
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
@@ -74,12 +74,10 @@ module.exports = class HypersignAuthService {
      * @returns boolean 
      */
     async verifyPresentation(vpObj, challenge, holderDidDocSigned) {
-        console.log("Verifying presentation");
-        if (!vpObj) throw new Error('HS-AUTH-NODE-SDK:: Error: presentation is null')
-        if (!challenge) throw new Error('HS-AUTH-NODE-SDK:: Error: challenge is null')
+        if (!vpObj) throw new Error('presentation is null')
+        if (!challenge) throw new Error('challenge is null')
 
         const vc = vpObj.verifiableCredential[0];
-        console.log("vc", vc);
         let options
         if (holderDidDocSigned) {
             const holderDidDocSignedtemp = JSON.parse(holderDidDocSigned)
@@ -191,7 +189,7 @@ module.exports = class HypersignAuthService {
             this.isSubscriptionSuccess = true;
             this.apiAuthToken = json.message;
         } else if (json.status == 401) {
-            throw new Error('HS-AUTH-NODE-SDK:: Error: Unauthorized subscription API access');
+            throw new Error('Unauthorized subscription API access');
         } else {
             throw new Error('HS-AUTH-NODE-SDK::Error:' + json.error);
         }
@@ -243,7 +241,7 @@ module.exports = class HypersignAuthService {
         const { challenge, vp, holderDidDocSigned } = body;
         if (this.isSubcriptionEnabled) {
             await this.checkSubscription();
-            if (!this.isSubscriptionSuccess) throw new Error('HS-AUTH-NODE-SDK:: Error: Subscription check unsuccessfull')
+            if (!this.isSubscriptionSuccess) throw new Error('Subscription check unsuccessfull')
         }
 
         const vpObj = JSON.parse(vp);
@@ -251,7 +249,7 @@ module.exports = class HypersignAuthService {
 
         logger.debug("HS-AUTH:: Presentation is being verified...")
 
-        if (!(await this.verifyPresentation(vpObj, challenge, holderDidDocSigned))) throw new Error('HS-AUTH-NODE-SDK:: Error: Could not verify the presentation')
+        if (!(await this.verifyPresentation(vpObj, challenge, holderDidDocSigned))) throw new Error('Could not verify the presentation')
 
 
         if (appUserID && appUserID != '') {
@@ -295,7 +293,7 @@ module.exports = class HypersignAuthService {
         const refTokenStored = await tokenStore.get(payload.id)
 
         if (refTokenStored != refreshToken) {
-            throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized: Invalid ref token or expired")
+            throw new Error("Invalid ref token or expired")
         }
 
         delete payload["exp"]
@@ -341,15 +339,15 @@ module.exports = class HypersignAuthService {
      * @returns null
      */
     async register(user, isThridPartyAuth = false, expirationDate, didDoc) {
-        if (!this.mailService) throw new Error("HS-AUTH-NODE-SDK:: Error: Mail configuration is not defined");
-        if (!this.verifyResourcePath) throw new Error("HS-AUTH-NODE-SDK:: Error: VerifyResourcePath is not set in configuration file")
+        if (!this.mailService) throw new Error("Mail configuration is not defined");
+        if (!this.verifyResourcePath) throw new Error("VerifyResourcePath is not set in configuration file")
 
-        if (!user) throw new Error("HS-AUTH-NODE-SDK:: Error: User object is null or empty.")
+        if (!user) throw new Error("User object is null or empty.")
 
         if (isThridPartyAuth) {
             const { did } = user;
 
-            if (!did) throw new Error("HS-AUTH-NODE-SDK:: Error: Did must be passed with thirdparty auth request");
+            if (!did) throw new Error("Did must be passed with thirdparty auth request");
 
             const verifiableCredential = await this.generateCredential(user, expirationDate, didDoc);
             return verifiableCredential;
@@ -372,7 +370,7 @@ module.exports = class HypersignAuthService {
         const deepLinkUrl = encodeURI(`${authenticationServerEndPoint}/deeplink.html?deeplink=hypersign:deeplink?url=${JSONdata}`);
         mailTemplate = mailTemplate.replace("@@DEEPLINKURL@@", deepLinkUrl);
 
-        if (!user.email) throw new Error("HS-AUTH-NODE-SDK:: Error: No email is passed. Email is required property");
+        if (!user.email) throw new Error("No email is passed. Email is required property");
         const info = await this.mailService.sendEmail(user.email, mailTemplate, `${this.options.mail.name} Auth Credential Issuance`);
         return null;
     }
@@ -392,15 +390,15 @@ module.exports = class HypersignAuthService {
 
     async poll({ challenge }) {
         if (!challenge) {
-            throw new Error("HS-AUTH-NODE-SDK:: Error: Challenge must be passed");
+            throw new Error("Challenge must be passed");
         }
         let client = clientStore.getClient(challenge);
         if (!client) {
-            throw new Error("HS-AUTH-NODE-SDK:: Error: Invalid challenge");
+            throw new Error("Invalid challenge");
         }
         const { isAuthenticated, accessToken, refreshToken } = client;
         if (isAuthenticated === false) {
-            throw new Error("HS-AUTH-NODE-SDK:: Error: Unauthorized");
+            throw new Error("Unauthorized");
         }
 
         clientStore.deleteClient(challenge);
