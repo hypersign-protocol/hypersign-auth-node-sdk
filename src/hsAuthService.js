@@ -42,7 +42,7 @@ module.exports = class HypersignAuthService {
 
         this.options.appCredential = options.appCredential;
         this.developerDashboardVerifyApi = `${sanetizeUrl(options.developerDashboardUrl)}/hs/api/v2/subscription/verify`;
-        this.mailService = this.options.mail && Object.keys(this.options.mail) > 0 ? new MailService({ ...this.options.mail }) : null;
+        this.mailService = this.options.mail && Object.keys(this.options.mail).length > 0 ? new MailService({ ...this.options.mail }) : null;
         this.apiAuthToken = "";
         this.isSubscriptionSuccess = false;
         this.isSubcriptionEnabled = options.isSubcriptionEnabled;
