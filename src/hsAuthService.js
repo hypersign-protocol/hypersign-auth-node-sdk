@@ -141,17 +141,17 @@ module.exports = class HypersignAuthService {
                 fields: userData
             }
         }
-        const credential = await this.hsSdkVC.getCredential(options)
+        const credential = await this.hsSdkVC.generate(options)
         logger.debug("HS-AUTH:: Credential is being signed...")
         const verificationMethodId = issuerKeys.publicKey.id + "#key-1";
         const signOptions = {
             credential,
             issuerDid: issuerKeys.publicKey.id,
-            privateKey: issuerKeys.privateKeyBase58,
+            privateKeyMultibase: issuerKeys.privateKeyMultibase,
             verificationMethodId,
             registerCredential: false,
         }
-        const signedCredential = await this.hsSdkVC.issueCredential(signOptions)
+        const { signedCredential } = await this.hsSdkVC.issue(signOptions)
         const txn_message = await this.hsSdkVC.generateRegisterCredentialStatusTxnMessage(signedCredential.credentialStatus, signedCredential.proof)
         signedCredential.txn = txn_message
         return signedCredential
