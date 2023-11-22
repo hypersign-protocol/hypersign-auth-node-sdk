@@ -152,7 +152,7 @@ module.exports = class HypersignAuthService {
             registerCredential: false,
         }
         const { signedCredential } = await this.hsSdkVC.issue(signOptions)
-        const txn_message = await this.hsSdkVC.generateRegisterCredentialStatusTxnMessage(signedCredential.credentialStatus, signedCredential.proof)
+        const txn_message = await this.hsSdkVC.generateRegisterCredentialStatusTxnMessage(signedCredential.credentialStatus, signedCredential.credentialStatusProof)
         signedCredential.txn = txn_message
         return signedCredential
     }
