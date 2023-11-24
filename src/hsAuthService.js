@@ -73,7 +73,7 @@ module.exports = class HypersignAuthService {
      * @param { String } challenge  // challenge
      * @returns boolean 
      */
-    async verifyPresentation(vpObj, challenge, holderDidDocSigned) {
+    async verifyPresentation(vpObj, challenge, holderDidDocSigned, domain = 'https://localhos:20202') {
         if (!vpObj) throw new Error('presentation is null')
         if (!challenge) throw new Error('challenge is null')
 
@@ -84,21 +84,21 @@ module.exports = class HypersignAuthService {
             options = {
                 signedPresentation: vpObj,
                 challenge,
-                domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
+                domain,
                 issuerDid: vc.issuer,
                 holderDidDocSigned: holderDidDocSignedtemp,
                 holderVerificationMethodId: vpObj.proof.verificationMethod,
-                issuerVerificationMethodId: vc.issuer + '#key-1'
+                issuerVerificationMethodId: vc.proof.verificationMethod
             }
         } else {
             options = {
                 signedPresentation: vpObj,
                 challenge,
-                domain: "https://localhos:20202", //TODO:  need to remove this hardcoding
+                domain,
                 issuerDid: vc.issuer,
                 holderDid: vc.credentialSubject.id,
                 holderVerificationMethodId: vpObj.proof.verificationMethod,
-                issuerVerificationMethodId: vc.issuer + '#key-1'
+                issuerVerificationMethodId: vc.proof.verificationMethod
             }
         }
         const result = await this.hsSDKVP.verify(options)
