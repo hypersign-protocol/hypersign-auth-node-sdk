@@ -1,6 +1,6 @@
 {
     "name": "hypersign-auth-node-sdk",
-    "version": "6.1.0",
+    "version": "6.4.5",
     "description": "Node JS SDK to intergrate Hypersign passwordless authentication in the backend",
     "main": "dist/hypersign-auth-node-sdk.js",
     "scripts": {
@@ -24,7 +24,7 @@
     "author": "Team Hypersign",
     "license": "MIT",
     "dependencies": {
-        "hs-ssi-sdk": "https://github.com/hypersign-protocol/hs-ssi-sdk#credential-revocation",
+        "hs-ssi-sdk": "^7.0.1",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",
