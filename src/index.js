@@ -51,9 +51,18 @@ module.exports = class HypersignAuth {
         // Making it backward compatible
         const hsFilePath = path.join(__dirname, '../../../', HYPERSIGN_CONFIG_FILE);
         const hsFilePathDev = path.join(__dirname, '../', HYPERSIGN_CONFIG_FILE)
+
+        console.log({
+            hsFilePath, hsFilePathDev
+        })
+
+        console.log({
+            hsFilePath: fs.existsSync(hsFilePath),
+            hsFilePathDev: fs.existsSync(hsFilePathDev)
+        })
         let hypersignConfig;
         let hsConfigJson;
-        if (!fs.existsSync(hsFilePath) && !fs.existsSync(hsFilePathDev)) {
+        if (!fs.existsSync(hsFilePath) || !fs.existsSync(hsFilePathDev)) {
             if (options.accessToken) {
                 Object.assign(hsJson.jwt, options.accessToken)
             } else {
@@ -106,6 +115,7 @@ module.exports = class HypersignAuth {
 
             hsConfigJson = hsJson;
         } else {
+
             hypersignConfig = fs.readFileSync(HYPERSIGN_CONFIG_FILE);
             hsConfigJson = JSON.parse(hypersignConfig);
         }
