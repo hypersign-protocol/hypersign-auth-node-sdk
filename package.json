@@ -24,7 +24,7 @@
     "author": "Team Hypersign",
     "license": "MIT",
     "dependencies": {
-        "hs-ssi-sdk": "^7.0.1",
+        "hs-ssi-sdk": "github:hypersign-protocol/hid-ssi-js-sdk#testcase/bjj",
         "jsonwebtoken": "^8.5.1",
         "node-fetch": "^2.6.1",
         "nodemailer": "^6.4.11",

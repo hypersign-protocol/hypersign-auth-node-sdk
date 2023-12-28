@@ -11,15 +11,15 @@ const HYPERSIGN_CONFIG_FILE = 'hypersign.json';
 
 const hidNetworkUrls = Object.freeze({
     testnet: {
-        rpc: 'https://rpc.jagrat.hypersign.id/',
-        rest: 'https://api.jagrat.hypersign.id/',
+        rpc: 'https://rpc.prajna.hypersign.id/',
+        rest: 'https://api.prajna.hypersign.id/',
     }
 })
 
 
 const hsJson = {
-    "networkUrl": "https://rpc.jagrat.hypersign.id/",
-    "networkRestUrl": "https://api.jagrat.hypersign.id/",
+    "networkUrl": "https://rpc.prajna.hypersign.id/",
+    "networkRestUrl": "https://api.prajna.hypersign.id/",
     "jwt": {
         "secret": "00c2c433-a077-4e68-b19c-1234f014a510",
         "expiryTime": 120000
@@ -50,7 +50,7 @@ module.exports = class HypersignAuth {
         ////
         // Making it backward compatible
         const hsFilePath = path.join(__dirname, '../../../', HYPERSIGN_CONFIG_FILE);
-        const hsFilePathDev = path.join(__dirname, '../', HYPERSIGN_CONFIG_FILE)
+        const hsFilePathDev = path.join(  HYPERSIGN_CONFIG_FILE)
 
         console.log({
             hsFilePath, hsFilePathDev
@@ -62,7 +62,7 @@ module.exports = class HypersignAuth {
         })
         let hypersignConfig;
         let hsConfigJson;
-        if (!fs.existsSync(hsFilePath) || !fs.existsSync(hsFilePathDev)) {
+        if ( !fs.existsSync(hsFilePathDev)) {
             if (options.accessToken) {
                 Object.assign(hsJson.jwt, options.accessToken)
             } else {

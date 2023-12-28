@@ -76,8 +76,10 @@ module.exports = class HypersignAuthService {
     async verifyPresentation(vpObj, challenge, holderDidDocSigned, domain = 'https://localhos:20202') {
         if (!vpObj) throw new Error('presentation is null')
         if (!challenge) throw new Error('challenge is null')
-
+        console.log(vpObj.proof.domain, "     ");
+        console.log(vpObj.proof.challenge, "       ");
         const vc = vpObj.verifiableCredential[0];
+        domain = vpObj.proof.domain
         let options
         if (holderDidDocSigned) {
             const holderDidDocSignedtemp = JSON.parse(holderDidDocSigned)
